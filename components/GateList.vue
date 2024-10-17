@@ -12,7 +12,7 @@
       <div
         v-else-if="index < gates.length - 1"
         @click="addGateBetween(element.gateNR)"
-        class="gate-divider cursorCopy"
+        class="gate-divider cursorCopy">
       </div>
     </div>
   </template>
