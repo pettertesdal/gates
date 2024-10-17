@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
   try {
     stageList = await connectAndQuery(`
       SELECT ID, divider
-      FROM dbo.gatedivider AS gd
+      FROM db_owner.gatedivider AS gd
       JOIN db_owner.projectModel AS pm ON gd.prosjektID = pm.ID
       WHERE pm.team = ${team};
   `);
