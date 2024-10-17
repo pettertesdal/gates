@@ -110,7 +110,7 @@
             <button type="button" @click="addStage" class="customButton addButton">+</button>
 
             <!-- Submit button -->
-            <button type="submit" class="customButton submitButton">Submit stages</button>
+            <button type="submit" class="customButton submitButton"">Submit stages</button>
           </form>
         </div>
 

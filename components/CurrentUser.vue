@@ -14,7 +14,7 @@
         </label>
       </div>
       <div>
-        <button @click="saveUsername" :disabled="!acceptCookies">Save</button>
+        <button @click="saveUsername" :disabled="!acceptCookies">Log In</button>
         <button @click="toggleUsernameModal">Cancel</button>
         <button @click="clearUsername">Log Out</button>
       </div>
