@@ -74,6 +74,20 @@ export const useGatesStore = defineStore('gates', () => {
         }
     }
 
+    async function submitStages(projectID, stageArray) {
+        try {
+            const response = await $fetch(`/gates/stages/${projectID}`, {
+                method: 'put',
+                body: JSON.stringify({
+                    projectID: projectID,
+                    stageArray: stageArray
+                })
+            })
+        } catch (error) {
+            console.error('Error updating stages', error)
+        }
+    }
+
     async function addGate(gateNR, projectID, title) {
 
         const requestBody = {
@@ -396,7 +410,8 @@ export const useGatesStore = defineStore('gates', () => {
         updateGateTitle, 
         updateGateOrder, 
         deleteGate,
-        getPlanneddate
+        getPlanneddate,
+        submitStages
     };
 
 });

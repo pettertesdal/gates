@@ -110,7 +110,7 @@
             <button type="button" @click="addStage" class="customButton addButton">+</button>
 
             <!-- Submit button -->
-            <button type="submit" class="customButton submitButton"">Submit stages</button>
+            <button type="submit" class="customButton submitButton">Submit stages</button>
           </form>
         </div>
 
@@ -304,7 +304,7 @@ const removeStage = (index) => {
 // Submit form logic
 const submitStages = () => {
   console.log('Submitted stages:', stages.value);
-  // Further submission handling can be added here
+  gateStore.submitStages(project.value.id, stages.value);
 };
 
 const modalActive = ref(false);
