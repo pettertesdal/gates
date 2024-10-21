@@ -9,6 +9,7 @@
     <div class="links-section" v-if="isLoggedIn">
       <NuxtLink to="/projectList" class="link-button">View Active Projects</NuxtLink>
       <NuxtLink to="/cookiepolicy" class="link-button">Cookie Policy</NuxtLink>
+      <NuxtLink to="/userManual" class="link-button">User Manual</NuxtLink>
     </div>
     
     <ReusableModal @close="toggleModal" :modalActive="modalActive">
