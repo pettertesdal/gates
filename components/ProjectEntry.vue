@@ -60,7 +60,7 @@ const poIsLate = computed(() => {
 });
 
 const fullProgress = computed(() => {
-  return props.entryData.progress === 100;
+  return props.entryData.progress.every(p => p === 100);
 });
 
 // Watch for changes in props.entryData and update local state
