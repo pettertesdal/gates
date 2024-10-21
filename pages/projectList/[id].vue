@@ -302,10 +302,35 @@ const removeStage = (index) => {
 };
 
 // Submit form logic
-const submitStages = () => {
-  console.log('Submitted stages:', stages.value);
-  gateStore.submitStages(project.value.id, stages.value);
+// Function to validate that stages are greater than 1 and in ascending order
+const validateStages = () => {
+  // Check if all stages are greater than 1
+  const allGreaterThanOne = stages.value.every(stage => stage > 1);
+
+  // Check if the stages are in ascending order
+  const isAscending = stages.value.every((stage, index) => {
+    return index === 0 || stage > stages.value[index - 1];
+  });
+
+  return allGreaterThanOne && isAscending;
 };
+
+// Submit form logic with validation
+const submitStages = () => {
+  if (!validateStages()) {
+    console.log("Skulle gitt warning")
+    alert('Stages validation failed: stages must be in ascending order.');
+    return;
+  }
+
+  const stagesWithStartGate = [1, ...stages.value];
+  console.log('Submitted stages:', stagesWithStartGate);
+  console.log('Project ID:', project.value.id);
+
+  gateStore.submitStages(project.value.id, stagesWithStartGate);
+  toggleEditStages();
+};
+
 
 const modalActive = ref(false);
 const toggleModal = () => {

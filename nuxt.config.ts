@@ -9,9 +9,12 @@ export default defineNuxtConfig({
     tokenSecret: process.env.NUXT_TOKEN_SECRET,
     tokenExpiration: process.env.NUXT_TOKEN_EXPIRATION,
   },
+
   modules: [
     '@pinia/nuxt',
     '@nuxt/test-utils/module'
   ],
+
   devtools: { enabled: true },
+  compatibilityDate: '2024-10-21',
 })
