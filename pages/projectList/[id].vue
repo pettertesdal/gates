@@ -318,7 +318,6 @@ const validateStages = () => {
 // Submit form logic with validation
 const submitStages = () => {
   if (!validateStages()) {
-    console.log("Skulle gitt warning")
     alert('Stages validation failed: stages must be in ascending order.');
     return;
   }
