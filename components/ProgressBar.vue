@@ -1,6 +1,5 @@
 <template>
   <div v-if="hasProgress">
-  <!-- Dynamically render progress bars for array values -->
   <div v-if="isArray" class="progress-container">
   <div
   
@@ -16,7 +15,6 @@
   </div>
   </div>
    
-      <!-- If it's a single value, render one progress bar -->
   <div v-else class="progress-bar single">
   <div class="filled-bar" :style="{ width: progressNumber + '%' }"></div>
   </div>
