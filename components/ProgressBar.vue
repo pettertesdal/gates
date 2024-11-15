@@ -24,10 +24,9 @@
 
 <script setup>
 import { computed } from 'vue';
-import { toRefs } from 'vue';
 
 // Props
-defineProps({
+const props = defineProps({
   progressNumber: {
     type: [Array, Number], // Accept either an array or a number
     default: () => [],
@@ -36,16 +35,16 @@ defineProps({
 
 // Computed properties
 const isArray = computed(() => {
-  if (Array.isArray(progressNumber) && progressNumber.length === 1) {
+  if (Array.isArray(props.progressNumber) && props.progressNumber.length === 1) {
     return false;
   }
-  return Array.isArray(progressNumber);
+  return Array.isArray(props.progressNumber);
 });
 
 const hasProgress = computed(() => {
   return (
-    (isArray.value && progressNumber.length > 0) ||
-    (!isArray.value && progressNumber >= 0)
+    (isArray.value && props.progressNumber.length > 0) ||
+    (!isArray.value && props.progressNumber >= 0)
   );
 });
 </script>
