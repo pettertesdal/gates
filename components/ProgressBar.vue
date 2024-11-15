@@ -1,13 +1,14 @@
 <template>
   <div v-if="hasProgress">
-    <!-- Check if it's an array, render two progress bars -->
+    <!-- Dynamically render progress bars for array values -->
     <div v-if="isArray" class="progress-container">
-      <div class="progress-bar preparation">
-        <div class="filled-bar" :style="{ width: (progressNumber[0] || 0) + '%' }"></div>
-      </div>
-
-      <div class="progress-bar delivery">
-        <div class="filled-bar" :style="{ width: (progressNumber[1] || 0) + '%' }"></div>
+      <div 
+        v-for="(progress, index) in progressNumber" 
+        :key="index" 
+        class="progress-bar"
+        :class="getBarClass(index)"
+      >
+        <div class="filled-bar" :style="{ width: (progress || 0) + '%' }"></div>
       </div>
     </div>
 
@@ -35,9 +36,6 @@ const props = defineProps({
 
 // Computed properties
 const isArray = computed(() => {
-  if (Array.isArray(props.progressNumber) && props.progressNumber.length === 1) {
-    return false;
-  }
   return Array.isArray(props.progressNumber);
 });
 
@@ -47,6 +45,12 @@ const hasProgress = computed(() => {
     (!isArray.value && props.progressNumber >= 0)
   );
 });
+
+// Dynamically assign bar classes based on index
+const getBarClass = (index) => {
+  const classes = ['preparation', 'delivery', 'extra-stage'];
+  return classes[index] || 'extra-stage'; // Use `extra-stage` for bars beyond predefined classes
+};
 </script>
 
 <style scoped>
@@ -78,6 +82,11 @@ const hasProgress = computed(() => {
 /* Delivery phase color */
 .delivery .filled-bar {
   background-color: #512d6d;
+}
+
+/* Extra stages color */
+.extra-stage .filled-bar {
+  background-color: #ffa500; /* Orange for extra stages */
 }
 
 /* Single progress bar color */
