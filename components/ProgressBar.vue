@@ -22,32 +22,32 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    progressNumber: {
-      type: [Array, Number], // Accept either an array or a number
-      default: () => [],
-    },
+<script setup>
+import { computed } from 'vue';
+import { toRefs } from 'vue';
+
+// Props
+defineProps({
+  progressNumber: {
+    type: [Array, Number], // Accept either an array or a number
+    default: () => [],
   },
-  computed: {
-    // Determine if progressNumber is an array
-    isArray() {
-      console.log(this.progressNumber)
-      if (Array.isArray(this.progressNumber) && this.progressNumber.length == 1) {
-        return false;
-      }
-      return Array.isArray(this.progressNumber);
-    },
-    // Determine if there is progress data
-    hasProgress() {
-      return (
-        (this.isArray && this.progressNumber.length > 0) ||
-        (!this.isArray && this.progressNumber >= 0)
-      );
-    },
-  },
-};
+});
+
+// Computed properties
+const isArray = computed(() => {
+  if (Array.isArray(progressNumber) && progressNumber.length === 1) {
+    return false;
+  }
+  return Array.isArray(progressNumber);
+});
+
+const hasProgress = computed(() => {
+  return (
+    (isArray.value && progressNumber.length > 0) ||
+    (!isArray.value && progressNumber >= 0)
+  );
+});
 </script>
 
 <style scoped>
