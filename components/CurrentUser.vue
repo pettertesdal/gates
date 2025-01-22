@@ -22,6 +22,7 @@
     <ReusableModal @close="toggleLoginModal" :modalActive="loginModalActive">
       <div>Enter admin password:</div>
       <input type="password" v-model="passwordInput" placeholder="Enter password" />
+      <div v-if="loginError" class="error-message">Invalid password. Please try again.</div>
       <div>
         <button @click="loginAuthentication">Log In</button>
         <button @click="toggleLoginModal">Cancel</button>
@@ -108,9 +109,22 @@ const saveUsername = () => {
   }
 };
 
-const loginAuthentication = () => {
-  authStore.login(usernameInput.value, passwordInput.value, 1);
-  toggleLoginModal();
+const loginError = ref(false);
+
+const loginAuthentication = async () => {
+  loginError.value = false; // Reset error stateconst 
+  var success = false;
+  success = await authStore.login(usernameInput.value, passwordInput.value);
+
+  if (success) {
+    // Close modal only if login is successful   
+    loginModalActive.value = false;
+  } else {
+    loginModalActive.value = false;
+    toggleUsernameModal();
+    saveUsername();
+    loginError.value = true;
+  }
 };
 
 
@@ -198,5 +212,12 @@ button.admin:active {
 
 input[type="checkbox"] {
   margin-right: 10px;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  font-size: 14px;
 }
 </style>
