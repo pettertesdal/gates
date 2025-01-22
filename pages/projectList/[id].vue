@@ -82,6 +82,8 @@
           <button @click="toggleModal" class="cancelButton">No</button>
         </ReusableModal>
       </div>
+
+      <!-- Project Settings Modal -->>
       <ReusableModal @close="toggleSettingsModal" :modalActive="settingsModalActive" v-if="admin">
         <h1>Project Settings</h1>
 
@@ -89,7 +91,6 @@
         <div class="stages-count">
           <label>Amount of project stages: {{ stages.length + 1 }}</label>
         </div>
-
 
         <!-- Hide the form if edit stages is unpressed -->
         <div v-if="editStages">
@@ -104,6 +105,11 @@
               </label>
               <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index]" min="0" required />
               <button type="button" @click="removeStage(index)" class="removeButton">-</button>
+              <select name="bar-colour" id="colour">
+                <option value="green">green</option>
+              </select>
+              <input type="string" class="name-input" />
+              <input type="number" class="weight-input" />
             </div>
 
             <!-- Button to add another stage -->
