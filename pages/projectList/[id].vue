@@ -103,13 +103,16 @@
               <label :for="'stageStart-' + (index + 2)">
                 Stage {{ index + 2 }} start gate:
               </label>
-              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index]" min="0" required />
-              <button type="button" @click="removeStage(index)" class="removeButton">-</button>
-              <select name="bar-colour" id="colour">
+              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index]" min="0" required class="stage-input" />
+              <select name="bar-colour" id="colour" class="colour-input">
+                <option selected disabled>Bar Colour</option>
                 <option value="green">green</option>
+                <option value="yellow">yellow</option>
+                <option value="red">red</option>
               </select>
               <input type="string" class="name-input" />
-              <input type="number" class="weight-input" />
+              <input type="number" class="weight-input" min="0"/>
+              <button type="button" @click="removeStage(index)" class="removeButton">-</button>
             </div>
 
             <!-- Button to add another stage -->
@@ -743,5 +746,28 @@ h1 {
 .button-container {
   margin-top: 0px;
   text-align: right;
+}
+
+.name-input {
+  width: 7%;
+  margin-left: 10px;
+  padding: 3px;
+}
+
+.weight-input {
+  width: 5%;
+  margin-left: 10px;
+  padding: 3px;
+}
+
+.colour-input {
+  width: 15%;
+  margin-left: 10px;
+  padding: 3px;
+}
+
+.stage-input {
+  width: 5%;
+  padding: 3px;
 }
 </style>
