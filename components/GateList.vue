@@ -132,7 +132,7 @@
   left: 0;
   right: 0;
   height: 8px;
-  background-color: red;
+  background-color: transparent;
 }
 .gate-empty {
   left: 0;
