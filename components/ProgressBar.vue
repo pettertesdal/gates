@@ -114,49 +114,49 @@
   
   .first .filled-bar {
   
-    background-color: #00a3e0; /* Turquoise for preparation */
+    background-color: #ffae00; /* PO - Orange */
   
   }
    
   .second .filled-bar {
   
-    background-color: #512d6d; /* Dark purple for delivery */
+    background-color: #a7a7a7; /* Inspect/Disassembly - Grey */
   
   }
    
   .third .filled-bar {
   
-    background-color: #ffc107; /* Yellow */
+    background-color: #000000; /* CVB - ?? */
   
   }
    
   .fourth .filled-bar {
   
-    background-color: #ff5722; /* Orange */
+    background-color: #f1f50c; /* Third Party - Yellow */
   
   }
    
   .fifth .filled-bar {
   
-    background-color: #76c7c0; /* Light turquoise */
+    background-color: #e000e0; /* Clean Start - Purple */
   
   }
    
   .sixth .filled-bar {
   
-    background-color: #2c7873; /* Darker turquoise */
+    background-color: #00e025; /* Assembly - Green */
   
   }
    
   .seventh .filled-bar {
   
-    background-color: #673ab7; /* Deep purple */
+    background-color: #e41b1b; /* Test - Red */
   
   }
    
   .eighth .filled-bar {
   
-    background-color: #009688; /* Teal */
+    background-color: #00771e; /* Delivery - Dark Green */
   
   }
    

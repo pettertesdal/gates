@@ -7,12 +7,30 @@
         <span v-else-if="orderBy === 'title' && order === 'asc'"> ↓</span>
       </div>
   
-      <!-- Split progress into two separate columns -->
+      <!-- Split progress into eight separate columns -->
       <div class="progressWrapper">
-        <span>Preparation Phase</span>
+        <span>PO</span>
       </div>
       <div class="progressWrapper">
-        <span>Delivery Phase</span>
+        <span>Insp/Disas.</span>
+      </div>
+      <div class="progressWrapper">
+        <span>CVB</span>
+      </div>
+      <div class="progressWrapper">
+        <span>3P</span>
+      </div>
+      <div class="progressWrapper">
+        <span>CS</span>
+      </div>
+      <div class="progressWrapper">
+        <span>Ass.</span>
+      </div>
+      <div class="progressWrapper">
+        <span>Test</span>
+      </div>
+      <div class="progressWrapper">
+        <span>Del.</span>
       </div>
   
       <div class="dateWrapper" @click="sortBySFDate">
@@ -97,14 +115,14 @@
   .titleWrapper {
     margin: auto;
     text-align: center;
-    width: 20%;
+    width: 19%;
     cursor: pointer;
   }
   
   .progressWrapper {
     margin: auto;
     text-align: center;
-    width: 20%; /* Adjusted width to fit two columns for progress */
+    width: 5%; /* Adjusted width to fit two columns for progress */
   }
   
   .dateWrapper {
