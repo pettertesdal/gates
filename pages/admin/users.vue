@@ -1,13 +1,13 @@
 <template>
     <div v-if="admin">
         <div>
-            <h1>Users:</h1>
+            <h3>Users:</h3>
         </div>
         <AdminComponentsUserListDesc></AdminComponentsUserListDesc>
         <div v-for="user in users" :key="user.id">
             <AdminComponentsUserEntry :entryData="user"></AdminComponentsUserEntry>
         </div>
-        <div class="bottom-spacer"></div>
+        <div class="bottom-spacer"/>
     </div>
     <div v-else>This is an admin only page, please do not attempt to access it without being logged in as an admin.</div>
 </template>

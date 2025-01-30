@@ -13,6 +13,7 @@
                     Change super admin password
                 </button>
             </div>
+            <NuxtLink to="admin/colors" class="buttonStyling">Color palette</NuxtLink>
         </div>
     </div>
     <div v-else>
