@@ -83,19 +83,45 @@
         </ReusableModal>
       </div>
 
-      <!-- Project Settings Modal -->>
+      <!-- Project Settings Modal -->
       <ReusableModal @close="toggleSettingsModal" :modalActive="settingsModalActive" v-if="admin">
         <h1>Project Settings</h1>
-
-        <!-- Label showing the amount of stages -->
-        <div class="stages-count">
-          <label>Amount of project stages: {{ stages.length + 1 }}</label>
-        </div>
 
         <!-- Hide the form if edit stages is unpressed -->
         <div v-if="editStages">
 
-          <div v-if="stages.length != 0" class="form-group">Stage 1 start gate: 1</div>
+          <!-- Label showing the amount of stages -->
+          <div class="stages-count">
+            <label>New amount of project stages: {{ stages.length + 1 }}</label>
+          </div>
+
+          <div v-if="stages.length != 0" class="form-group">
+            <label> Stage 1 start gate: </label>
+
+            <!-- Stage start input -->
+            <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index]" min="1" max="1" default="1" placeholder="1" class="stage-input" />
+
+            <!-- Form for color-selection -->
+            <select name="bar-color" id="color" class="color-input">
+              <option selected disabled>Bar color</option>
+              <option value="green">green</option>
+              <option value="yellow">yellow</option>
+              <option value="red">red</option>
+            </select>
+
+            <!-- Stage name and weight -->
+            <input type="string" class="name-input" placeholder="name"/>
+            <div class="tooltip-container">
+              🛈
+              <div class="tooltiptext">Stage name should be shorthand or abbreviated.</div>
+            </div>
+
+            <input type="number" class="weight-input" min="0" placeholder="width"/>
+            <div class="tooltip-container">
+              🛈
+              <div class="tooltiptext">Enter a number to weight the size of this bar compared to the others.</div>
+            </div>
+          </div>
 
           <!-- Form for stage gates -->
           <form @submit.prevent="submitStages">
@@ -103,15 +129,32 @@
               <label :for="'stageStart-' + (index + 2)">
                 Stage {{ index + 2 }} start gate:
               </label>
-              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index]" min="0" required class="stage-input" />
-              <select name="bar-colour" id="colour" class="colour-input">
-                <option selected disabled>Bar Colour</option>
+
+              <!-- Stage start input -->
+              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index]" min="2" required class="stage-input" />
+
+              <!-- Form for color-selection -->
+              <select name="bar-color" id="color" class="color-input">
+                <option selected disabled>Bar color</option>
                 <option value="green">green</option>
                 <option value="yellow">yellow</option>
                 <option value="red">red</option>
               </select>
-              <input type="string" class="name-input" />
-              <input type="number" class="weight-input" min="0"/>
+
+              <!-- Stage name and weight -->
+              <input type="string" class="name-input" placeholder="name"/>
+              <div class="tooltip-container">
+                🛈
+                <div class="tooltiptext">Stage name should be shorthand or abbreviated.</div>
+              </div>
+
+              <input type="number" class="weight-input" min="0" placeholder="width"/>
+              <div class="tooltip-container">
+                🛈
+                <div class="tooltiptext">Enter a number to weight the size of this bar compared to the others.</div>
+              </div>
+
+              <!-- Remove stage from form-->
               <button type="button" @click="removeStage(index)" class="removeButton">-</button>
             </div>
 
@@ -121,6 +164,9 @@
             <!-- Submit button -->
             <button type="submit" class="customButton submitButton">Submit stages</button>
           </form>
+        </div>
+        <div v-else class="stages-count">
+          <label>Current amount of project stages: !!ERROR</label>
         </div>
 
         <div class="button-container">
@@ -750,17 +796,43 @@ h1 {
 
 .name-input {
   width: 7%;
-  margin-left: 10px;
   padding: 3px;
+  margin-left: 10px;
+}
+
+.tooltip-container {
+ position: relative;
+ display: inline-block;
+ background: transparent;
+ border-left: 0px;
+ margin-left: 5px;
+}
+.tooltiptext {
+ opacity: 0; /* Initially hidden */
+ width: 130px;
+ background-color: black;
+ color: #fff;
+ border-radius: 6px;
+ padding: 5px 10px;
+ /* Position the tooltip */
+ position: absolute;
+ z-index: 1;
+ transition: opacity 0.3s ease-in-out, visibility 0s linear 0.5s; /* Delay tooltip visibility */
+ visibility: hidden; /* Keep it hidden initially */
+}
+.tooltip-container:hover .tooltiptext {
+ opacity: 1;
+ visibility: visible; /* Make it visible */
+ transition-delay: 0.2s; /* Remove delay when showing */
 }
 
 .weight-input {
-  width: 5%;
+  width: 8%;
   margin-left: 10px;
   padding: 3px;
 }
 
-.colour-input {
+.color-input {
   width: 15%;
   margin-left: 10px;
   padding: 3px;
