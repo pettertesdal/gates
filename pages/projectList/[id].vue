@@ -131,10 +131,10 @@
               </label>
 
               <!-- Stage start input -->
-              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index]" min="2" required class="stage-input" />
+              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index].selectedNumber" min="2" required class="stage-input" />
 
               <!-- Form for color-selection -->
-              <select name="bar-color" id="color" class="color-input">
+              <select name="bar-color" id="color" class="color-input" v-model="stage.color">
                 <option selected disabled>Bar color</option>
                 <option value="green">green</option>
                 <option value="yellow">yellow</option>
@@ -346,7 +346,12 @@ const stages = ref([]);
 
 // Function to add a new stage
 const addStage = () => {
-  stages.value.push(0); // Adds a stage with a default value of 0
+  stages.value.push({
+    selectedNumber: null,
+    name: '',
+    color: '',
+    weight: ''
+  }); 
 };
 
 // Function to remove a stage
@@ -359,15 +364,9 @@ const removeStage = (index) => {
 // Submit form logic
 // Function to validate that stages are greater than 1 and in ascending order
 const validateStages = () => {
-  // Check if all stages are greater than 1
-  const allGreaterThanOne = stages.value.every(stage => stage > 1);
-
-  // Check if the stages are in ascending order
-  const isAscending = stages.value.every((stage, index) => {
-    return index === 0 || stage > stages.value[index - 1];
+  return stages.value.every((stage, index) => {
+    return index === 0 || stage.selectedNumber > stages.value[index - 1].selectedNumber;
   });
-
-  return allGreaterThanOne && isAscending;
 };
 
 // Submit form logic with validation
@@ -377,7 +376,7 @@ const submitStages = () => {
     return;
   }
 
-  const stagesWithStartGate = [1, ...stages.value];
+  const stagesWithStartGate = [{selectedNumber: 1, name: "FRQ/PO", color: "#FFFFFF", weight: 1}, ...stages.value];
   console.log('Submitted stages:', stagesWithStartGate);
   console.log('Project ID:', project.value.id);
 
