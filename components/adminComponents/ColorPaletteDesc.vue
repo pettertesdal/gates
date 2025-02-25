@@ -1,8 +1,7 @@
 <template>
     <div class="row header">
-        <div class="w50">ID: </div>
-        <div class="w25">Color: </div>
-        <div class="w25">Hex: </div>
+        <div class="w50">Color: </div>
+        <div class="w50">Hex: </div>
     </div>
 </template>
 

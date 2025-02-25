@@ -39,6 +39,8 @@ export const useStageStore = defineStore('stages', () => {
     }
 
     async function addStages(projectID, stageArray) {
+        console.log("STAGEARRY IN STORE: ")
+        console.log(stageArray)
         try {
             await deleteStages(projectID); // Delete old stages first
             const response = await fetch('/stages', {
@@ -46,7 +48,6 @@ export const useStageStore = defineStore('stages', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ projectID, stages: stageArray })
             });
-            if (!response.ok) throw new Error("Failed to add stages");
 
             const newStages = await response.json();
             stages.value.push(...newStages);
@@ -60,7 +61,7 @@ export const useStageStore = defineStore('stages', () => {
     }
 
     function getStagesByID(projectID) {
-        stages.value.filter(stage => stage.projectID === props.entryData.id);
+        return stages.value.filter(stage => stage.projectID === props.entryData.id);
     }
 
     return {

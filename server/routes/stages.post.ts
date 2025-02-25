@@ -2,9 +2,12 @@ export default defineEventHandler(async event => {
 
     try {
         const body = await readBody(event);
-        const { projectID, stageArray} = body
+        const { projectID, stages} = body
 
-        if (!projectID || !Array.isArray(stageArray) || stageArray.length === 0) {
+        console.log("BODY: ")
+        console.log(body.stages)
+
+        if (!projectID || !Array.isArray(body.stages) || stages.length === 0) {
             throw createError({
                 statusCode: 400,
                 statusMessage: 'Bad Request',
@@ -12,12 +15,17 @@ export default defineEventHandler(async event => {
             });
         }
 
-        for (const stage of stageArray) {
+        for (const stage of body.stages) {
             try {
 
-                //Query logic
+                await connectAndQuery(`
+                    INSERT INTO [db_owner].[stages] (projectID, nr, hex, name, weight)
+                    VALUES (${projectID}, '${stage.selectedNumber}', '${stage.color}', '${stage.name}', '${stage.weight}');
+                  `);
 
-                console.log(`Inserted stage: ${stage} for project ${projectID}`);
+                console.log(`Inserted stage: `);
+                console.log(stage)
+                console.log(` for project ${projectID}`)
                 
             } catch (error) {
                 console.error(`Failed to insert stage ${stage.name}:`, error);
@@ -32,6 +40,7 @@ export default defineEventHandler(async event => {
         return { status: 'success', message: 'Valid input' };
 
     } catch (error) {
+        console.log("ERROR 2")
         return createError({
           statusCode: 500,
           statusMessage: 'Internal Server Error',

@@ -1,11 +1,10 @@
 <template>
     <div class="color-card">
-        <div class="w50">{{ props.entryData.ID }}</div>
-        <div class="w25 row">
+        <div class="w50 row">
             <div class="w50">{{ props.entryData.name }}</div>
             <div class="w50 border" :style="{backgroundColor: props.entryData.hex}"></div>
         </div>
-        <div class="w25">{{ props.entryData.hex }}</div>
+        <div class="w50">{{ props.entryData.hex }}</div>
         
         <div class="delete" @click.stop="toggleModal" v-if="superadmin">
             <img src="/assets/x.svg" alt="Delete" />

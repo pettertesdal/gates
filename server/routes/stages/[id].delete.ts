@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
         `);
 
 
-        return { deleted: true };
+        return true;
     } catch (error) {
         console.error('Error deleting stages:', error);
         return createError({
