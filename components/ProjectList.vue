@@ -99,6 +99,7 @@ const submitForm = () => {
   const projectId = uuid();
   store.addProject(projectId, formData.value.title, 0, formData.value.SF.toString().replace(/-/g, ''), formData.value.PO.toString().replace(/-/g, ''), true, formData.value.PEM, "comment");
   index.value++;
+  stagesStore.fetchStages();
   toggleModal();
 };
 
