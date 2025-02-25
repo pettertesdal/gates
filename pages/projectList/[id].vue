@@ -165,9 +165,6 @@
             <button type="submit" class="customButton submitButton">Submit stages</button>
           </form>
         </div>
-        <div v-else class="stages-count">
-          <label>Current amount of project stages: !!ERROR</label>
-        </div>
 
         <div class="button-container">
         <button v-if="!editStages" @click="toggleEditStages" type="button" class="customButton archiveButton">Edit Stages</button>
