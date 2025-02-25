@@ -46,6 +46,7 @@ import { useIntervalFn } from '@vueuse/core' // VueUse helper, install it
 const store = useProjectsStore();
 const gateStore = useGatesStore();
 const authStore = useAuthStore();
+const stagesStore = useStageStore();
 
 const projects = ref([]);
 const index = ref(0);
@@ -80,6 +81,7 @@ const paginatedProjects = computed(() => {
 
 onMounted(() => {
   fetchProjects();
+  stagesStore.fetchStages();
 });
 
 watchEffect(() => {

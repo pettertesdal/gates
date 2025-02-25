@@ -5,6 +5,7 @@ export const useStageStore = defineStore('stages', () => {
     const stages = ref([]);
 
     async function fetchStages() {
+        console.log("Fetching stages..")
         try {
             const response = await $fetch('/stages', {
                 method: 'GET'
@@ -20,7 +21,7 @@ export const useStageStore = defineStore('stages', () => {
             }));
             stages.value = stagesArray;
 
-            console.log("STAGES IN DATABASE: " + stages.value)
+            console.log("STAGES IN DATABASE: ", stages.value)
 
         } catch (error) {
             console.error('Error fetching stages', error)
@@ -61,7 +62,7 @@ export const useStageStore = defineStore('stages', () => {
     }
 
     function getStagesByID(projectID) {
-        return stages.value.filter(stage => stage.projectID === props.entryData.id);
+        return stages.value.filter(stage => stage.projectID === projectID);
     }
 
     return {
