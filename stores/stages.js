@@ -59,11 +59,16 @@ export const useStageStore = defineStore('stages', () => {
         return stages.value;
     }
 
+    function getStagesByID(projectID) {
+        stages.value.filter(stage => stage.projectID === props.entryData.id);
+    }
+
     return {
         stages,
         fetchStages,
         deleteStages,
         getStages,
-        add_stages
+        addStages,
+        getStagesByID
     }
 })

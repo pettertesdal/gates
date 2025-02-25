@@ -181,12 +181,14 @@ import { useProjectsStore } from '@/stores/projects';
 import { useGatesStore } from '@/stores/gates';
 import { useTasksStore } from '@/stores/tasks';
 import { computed, watch, onMounted } from 'vue';
+import { useStageStore } from '~/stores/stages';
 
 const store = useProjectsStore();
 const gateStore = useGatesStore();
 const taskStore = useTasksStore();
 const authStore = useAuthStore();
 const colorStore = useColorStore();
+const stagesStore = useStageStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -356,6 +358,7 @@ const submitStages = () => {
   console.log('Submitted stages:', stages.value);
 
   gateStore.submitStages(project.value.id, stages.value.map(stage => stage.selectedNumber));
+  stagesStore.addStages(project.value.id, stages.value)
   toggleEditStages();
 };
 
