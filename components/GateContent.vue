@@ -25,7 +25,7 @@
             No tasks found for this gate
           </div>
       </div>
-      <Modal @close="toggleModal" :modalActive="modalActive">
+      <Modal @close="toggleModal" :modalActive="modalActive" style="z-index: 1000;">
         <h1>New Task</h1>
         <form @submit.prevent="submitForm">
           <label>Task title: </label>

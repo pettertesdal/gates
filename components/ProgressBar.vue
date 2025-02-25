@@ -66,7 +66,7 @@ const hasProgress = computed(() => (
 ));
 
 const stageColor = computed(() => projectStages.value.length > 0 ? projectStages.value[0].hex : '#76c7c0');
-const singleStageName = computed(() => projectStages.value.length > 0 ? projectStages.value[0].name : 'Stage');
+const singleStageName = computed(() => projectStages.value.length > 0 ? projectStages.value[0].name : '');
 
 // Get the stage color for each progress bar in an array
 const getStageColor = (index) => {
@@ -75,7 +75,7 @@ const getStageColor = (index) => {
 
 // Get the stage name for each progress bar in an array
 const getStageName = (index) => {
-  return projectStages.value[index]?.name || 'Stage';
+  return projectStages.value[index]?.name || '';
 };
 
 // Adjust width of each bar based on stage weight

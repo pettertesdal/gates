@@ -9,28 +9,6 @@
   
       <!-- Split progress into eight separate columns -->
       <div class="progressWrapper">
-        <span>PO</span>
-      </div>
-      <div class="progressWrapper">
-        <span>Insp/Disas.</span>
-      </div>
-      <div class="progressWrapper">
-        <span>CVB</span>
-      </div>
-      <div class="progressWrapper">
-        <span>3P</span>
-      </div>
-      <div class="progressWrapper">
-        <span>CS</span>
-      </div>
-      <div class="progressWrapper">
-        <span>Ass.</span>
-      </div>
-      <div class="progressWrapper">
-        <span>Test</span>
-      </div>
-      <div class="progressWrapper">
-        <span>Del.</span>
       </div>
   
       <div class="dateWrapper" @click="sortBySFDate">
@@ -122,7 +100,7 @@
   .progressWrapper {
     margin: auto;
     text-align: center;
-    width: 5%; /* Adjusted width to fit two columns for progress */
+    width: 40%; /* Adjusted width to fit two columns for progress */
   }
   
   .dateWrapper {
