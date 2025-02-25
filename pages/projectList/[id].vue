@@ -92,63 +92,34 @@
 
           <!-- Label showing the amount of stages -->
           <div class="stages-count">
-            <label>New amount of project stages: {{ stages.length + 1 }}</label>
-          </div>
-
-          <div v-if="stages.length != 0" class="form-group">
-            <label> Stage 1 start gate: </label>
-
-            <!-- Stage start input -->
-            <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index]" min="1" max="1" default="1" placeholder="1" class="stage-input" />
-
-            <!-- Form for color-selection -->
-            <select name="bar-color" id="color" class="color-input">
-              <option selected disabled>Bar color</option>
-              <option value="green">green</option>
-              <option value="yellow">yellow</option>
-              <option value="red">red</option>
-            </select>
-
-            <!-- Stage name and weight -->
-            <input type="string" class="name-input" placeholder="name"/>
-            <div class="tooltip-container">
-              🛈
-              <div class="tooltiptext">Stage name should be shorthand or abbreviated.</div>
-            </div>
-
-            <input type="number" class="weight-input" min="0" placeholder="width"/>
-            <div class="tooltip-container">
-              🛈
-              <div class="tooltiptext">Enter a number to weight the size of this bar compared to the others.</div>
-            </div>
+            <label>New amount of project stages: {{ stages.length }}</label>
           </div>
 
           <!-- Form for stage gates -->
           <form @submit.prevent="submitStages">
             <div class="form-group" v-for="(stage, index) in stages" :key="index">
-              <label :for="'stageStart-' + (index + 2)">
-                Stage {{ index + 2 }} start gate:
+              <label :for="'stageStart-' + (index + 1)">
+                Stage {{ index + 1 }} start gate:
               </label>
 
               <!-- Stage start input -->
-              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index].selectedNumber" min="2" required class="stage-input" />
+              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index].selectedNumber" min="1" required class="stage-input" />
 
               <!-- Form for color-selection -->
-              <select name="bar-color" id="color" class="color-input" v-model="stage.color">
-                <option selected disabled>Bar color</option>
-                <option value="green">green</option>
-                <option value="yellow">yellow</option>
-                <option value="red">red</option>
+              <select v-model="stage.color" class="color-input">
+                <option v-for="color in colors" :key="color.id" :value="color.hex">
+                  {{ color.name }}
+                </option>
               </select>
 
               <!-- Stage name and weight -->
-              <input type="string" class="name-input" placeholder="name"/>
+              <input type="string" class="name-input" placeholder="name" v-model="stage.name" required/>
               <div class="tooltip-container">
                 🛈
                 <div class="tooltiptext">Stage name should be shorthand or abbreviated.</div>
               </div>
 
-              <input type="number" class="weight-input" min="0" placeholder="width"/>
+              <input type="number" class="weight-input" min="0" placeholder="width" default="1" v-model="stage.weight" required/>
               <div class="tooltip-container">
                 🛈
                 <div class="tooltiptext">Enter a number to weight the size of this bar compared to the others.</div>
@@ -215,6 +186,7 @@ const store = useProjectsStore();
 const gateStore = useGatesStore();
 const taskStore = useTasksStore();
 const authStore = useAuthStore();
+const colorStore = useColorStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -232,6 +204,7 @@ const poFloat = ref(0);
 const daysToPO = computed(() => calculateDaysToPO());
 const admin = computed(() => authStore.isAdmin());
 const editStages = ref(false);
+var colors;
 
 const enableEditTitleMode = () => {
   editTitleMode.value = true;
@@ -307,6 +280,13 @@ onMounted(async () => {
   }
 
   try {
+    await colorStore.fetchColors();
+    colors = colorStore.getColors()
+  } catch (error) {
+    console.error('Error fetching colors in palette', error)
+  }
+
+  try {
     const fetchedProject = await store.getProjectById(projectId);
     if (fetchedProject) {
       project.value = fetchedProject;
@@ -362,7 +342,7 @@ const removeStage = (index) => {
 // Function to validate that stages are greater than 1 and in ascending order
 const validateStages = () => {
   return stages.value.every((stage, index) => {
-    return index === 0 || stage.selectedNumber > stages.value[index - 1].selectedNumber;
+    return (index === 0 && stage.selectedNumber === 1) || stage.selectedNumber > stages.value[index - 1].selectedNumber;
   });
 };
 
@@ -373,11 +353,9 @@ const submitStages = () => {
     return;
   }
 
-  const stagesWithStartGate = [{selectedNumber: 1, name: "FRQ/PO", color: "#FFFFFF", weight: 1}, ...stages.value];
-  console.log('Submitted stages:', stagesWithStartGate);
-  console.log('Project ID:', project.value.id);
+  console.log('Submitted stages:', stages.value);
 
-  gateStore.submitStages(project.value.id, stagesWithStartGate);
+  gateStore.submitStages(project.value.id, stages.value.map(stage => stage.selectedNumber));
   toggleEditStages();
 };
 
