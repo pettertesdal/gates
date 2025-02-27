@@ -77,7 +77,6 @@ export const useGatesStore = defineStore('gates', () => {
 
     async function submitStages(projectID, stageArray) {
         try {
-            console.log(projectID)
             const response = await $fetch(`/gates/stages/${projectID}`, {
                 method: 'put',
                 body: JSON.stringify({

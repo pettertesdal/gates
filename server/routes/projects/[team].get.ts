@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     projects = await connectAndQuery(
-      `SELECT pm.*, pavg.AverageProgress FROM gates.db_owner.projectModel pm LEFT JOIN gates.db_owner.ProjectAverageProgress pavg ON pm.ID = pavg.ID WHERE pm.team = ${team}`);
+      `SELECT pm.*, pavg.AverageProgress FROM gates.db_owner.projectModel pm LEFT JOIN gates.db_owner.ProjectAverageProgress pavg ON pm.ID = pavg.ID WHERE (pm.team = ${team}) OR (pm.template ='true')`);
   } catch (error) {
     console.log(error)
     return createError({
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
       FROM [db_owner].[projectModel] p 
       JOIN [db_owner].[gateModel] g ON p.ID = g.prosjektId 
       JOIN [db_owner].[taskModel] t ON p.ID = t.prosjektID AND g.ID = t.gateID
-      WHERE p.team = ${team}
+      WHERE (p.team = ${team}) OR (p.template ='true')
       GROUP BY p.ID, p.team, g.stage
       ORDER BY p.ID, stage;
   `);
@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
       SELECT ID, divider
       FROM db_owner.gatedivider AS gd
       JOIN db_owner.projectModel AS pm ON gd.prosjektID = pm.ID
-      WHERE pm.team = ${team};
+      WHERE (pm.team = ${team}) OR (pm.template ='true');
   `);
   } catch (error) {
     console.log(error)

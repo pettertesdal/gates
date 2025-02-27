@@ -11,6 +11,15 @@ export default defineEventHandler(async event => {
 
       console.log("Copied ID: "+ID)
 
+      console.log("TYPES:", typeof(ID))
+      console.log(typeof(title))
+      console.log(typeof(plannedDate))
+      console.log(typeof(PODate))
+      console.log(typeof(PEM))
+      console.log(typeof(team))
+      console.log(team)
+      console.log(typeof(template))
+
       // Create the project
       projects = await connectAndQuery(`
         EXEC gates.db_owner.DuplicateProject

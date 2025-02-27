@@ -8,6 +8,8 @@ export const useProjectsStore = defineStore('projects', () => {
     const index = ref(0);
     const managerProjects = ref([]);
     const projectSorting = ref();
+    const templateProjects = ref([])
+    const allProjects = ref([])
 
     function setProjects(newProjects) {
         projects.value = newProjects;
@@ -77,6 +79,33 @@ export const useProjectsStore = defineStore('projects', () => {
             }));
 
             setManagerProjects(projectsArray);
+            allProjects.value = projectsArray;
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+        }
+    }
+
+    async function fetchTemplates() {
+        const authStore = useAuthStore();
+
+        if (!authStore.isLoggedIn()) {
+            return null;
+        }
+
+        try {
+            const response = await $fetch('/templates/', {
+                method: 'GET'
+            });
+            const data = response.data;
+            const templateArray = Object.values(data).map(x => ({
+                ID: x.ID,
+                title: x.title,
+                team: x.team,
+                template: x.template
+            }))
+
+            templateProjects.value = templateArray;
+
         } catch (error) {
             console.error('Error fetching projects:', error);
         }
@@ -255,24 +284,25 @@ export const useProjectsStore = defineStore('projects', () => {
         return templateId.value;
     }
 
-    function getDividers(projectID) {
-
-        let index = projects.value.findIndex(project => project.id === projectID);
-        console.log("this is the index" + index);
-        const dividers = projects.value[index].dividers;
-        return dividers;
-    }
-
     const filteredProjects = computed(() => {
-        return projects.value.filter(project => project.id != templateId.value);
+        return projects.value.filter(project => !project.template);
     });
+
 
     function getProjects() {
         return filteredProjects.value;
     }
 
+    function getTemplates() {
+        return templateProjects.value;
+    }
+
     function getManagerProjects() {
         return managerProjects.value;
+    }
+
+    function getAllprojects() {
+        return allProjects.value;
     }
 
     function sortProjects(comparator) {
@@ -325,18 +355,12 @@ export const useProjectsStore = defineStore('projects', () => {
         return pro.SFdate;
     }
 
-    async function addProject(ID, title, progress, plannedDate, PODate, status, PEM, comment) {
+    async function addProject(ID, copyID ,title, progress, plannedDate, PODate, status, PEM, comment) {
         const authStore = useAuthStore();
         const userTeam = authStore.getUserTeam();
 
-        const templateProject = projects.value.find(project => project.template === true);
-        if (templateProject) {
-            templateId.value = templateProject.id;
-        }
-        console.log("ID of template in store: " + typeof templateId.value)
-
         const requestBody = {
-            ID: Number(templateId.value),
+            ID: Number(copyID),
             title: title,
             progress: progress,
             plannedDate: plannedDate,
@@ -347,6 +371,47 @@ export const useProjectsStore = defineStore('projects', () => {
             team: userTeam,
             template: false
         };
+
+        const admin = useCookie('admin');
+        try {
+            await $fetch('/projects', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json',
+                    'authentication': admin.value
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            this.fetchProjects();
+            index.value++;
+        } catch (error) {
+            return createError({
+                statusCode: 500,
+                statusMessage: 'Internal Server Error',
+                data: 'Failed to create project'
+            });
+        }
+    }
+
+    async function addTemplate(copyID ,title, team) {
+        const authStore = useAuthStore();
+        const userTeam = authStore.getUserTeam();
+
+        const requestBody = {
+            ID: Number(copyID),
+            title: title,
+            progress: "progress",
+            plannedDate: "3000-01-01",
+            PODate: "3000-01-01",
+            status: "status",
+            PEM: "NONE",
+            comment: "comment",
+            team: team,
+            template: 1
+        };
+
+        console.log("BODY: ",requestBody)
 
         const admin = useCookie('admin');
         try {
@@ -505,13 +570,17 @@ export const useProjectsStore = defineStore('projects', () => {
         projects,
         managerProjects,
         getProjects,
+        getTemplates,
         getProjectById,
         addProject,
+        addTemplate,
         setProjects,
         fetchProjects,
+        fetchTemplates,
         getPODate,
         deleteProject,
         getSFDate,
+        getAllprojects,
         updateProjectTitle,
         updateProjectComment,
         updatePODate,
@@ -527,7 +596,6 @@ export const useProjectsStore = defineStore('projects', () => {
         sortProjects,
         fetchAllProjects,
         getManagerProjects,
-        getDividers,
         projectSorting
     };
 });

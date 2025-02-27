@@ -1,6 +1,6 @@
 <template>
     <div v-if="admin">
-        <h1>Administrator page:</h1>
+        <h3>Administrator page:</h3>
         <div class="link-wrapper">
             <NuxtLink to="admin/users" class="buttonStyling">Users</NuxtLink>
             <NuxtLink to="admin/user_requests" class="buttonStyling">Incoming user requests ({{ reqnr }})</NuxtLink>
@@ -11,6 +11,12 @@
                 </button>
                 <button class="buttonStyling" @click="toggleSuperModal">
                     Change super admin password
+                </button>
+                <button class="buttonStyling" @click="toggleEditTemplateModal">
+                    Edit a template
+                </button>
+                <button class="buttonStyling" @click="toggleNewTemplateModal">
+                    Add new template
                 </button>
             </div>
             <NuxtLink to="admin/colors" class="buttonStyling">Color palette</NuxtLink>
@@ -54,6 +60,42 @@
             <button @click="toggleSuperModal" class="basicButton">Close window</button>
         </template>
     </Modal>
+
+    <Modal :modal-active="editTemplateModalActive" @close="toggleEditTemplateModal">
+        <div style="cursor: default; font-weight: bold; font-size: large;">Edit a template:</div><br>
+        <label>Template to edit:</label><br>
+        <select v-model="templateToEdit" class="input-field1">
+            <option v-for="template in templates" :value="template.ID">
+                {{ template.title }}
+            </option>
+        </select><br><br>
+        <NuxtLink :to="`template/${templateToEdit}`" class="button basicButton">Edit template</NuxtLink>
+        <button @click="toggleEditTemplateModal" class="basicButton">Close window</button>
+    </Modal>
+
+    <Modal :modal-active="newTemplateModalActive" @close="toggleNewTemplateModal">
+        <form @submit.prevent="submitForm">
+            <div style="cursor: default; font-weight: bold; font-size: large;">Add new template:</div><br>
+            <label>Template name: </label><br>
+            <input v-model="newTemplateTitle" type="text" class="input-field1" required><br>
+            <label>Template base:</label><br>
+            <select v-model="copyTemplateID" class="input-field1" required>
+                <option :value="58">Empty project</option>
+                <option v-for="template in templates" :value="template.ID">
+                    {{ template.title }}
+                </option>
+            </select><br>
+            <label>Template team:</label><br>
+            <select v-model="newTemplateTeam" class="input-field1" required>
+                <option v-for="team in teams" :value="team.id">
+                    {{ team.team }}
+                </option>
+            </select><br><br>
+            <button type="submit" class="basicButton">Create template</button>
+        </form><br>
+        <button @click="toggleNewTemplateModal" class="basicButton">Close window</button>
+    </Modal>
+
 </template>
 
 <script setup>
@@ -63,24 +105,58 @@ import Modal from '~/components/ReusableModal.vue';
 const authStore = useAuthStore();
 const projectStore = useProjectsStore();
 const requestStore = useUserRequestsStore();
+const teamStore = useTeamsStore();
 
 const admin = computed(() => authStore.isAdmin());
 const superadmin = computed(() => authStore.isSuperAdmin());
 
 await requestStore.fetchRequests();
 const reqnr = requestStore.reqCount();
+const templates = ref([])
+const teams = ref([])
 
-projectStore.fetchProjects();
+const copyTemplateID = ref(0)
+const newTemplateTitle = ref('')
+const newTemplateTeam = ref('')
+
+
+projectStore.fetchAllProjects();
+projectStore.fetchTemplates();
+teamStore.fetchTeams();
+
+teams.value = teamStore.getTeams();
+templates.value = projectStore.getTemplates();
 
 const admModalActive = ref(false);
 const toggleAdmModal = () => {
     admModalActive.value = !admModalActive.value;
 };
 
+const submitForm = () => {
+    console.log("New Template Values: ", copyTemplateID.value, newTemplateTitle.value, newTemplateTeam.value)
+    projectStore.addTemplate(copyTemplateID.value, newTemplateTitle.value, newTemplateTeam.value);
+};
+
 const superModalActive = ref(false);
 const toggleSuperModal = () => {
     superModalActive.value = !superModalActive.value;
 };
+
+const editTemplateModalActive = ref(false);
+const toggleEditTemplateModal = () => {
+    templates.value = projectStore.getTemplates();
+    templates.value = templates.value.filter(x => x.ID != 58)
+    editTemplateModalActive.value = !editTemplateModalActive.value;
+}
+
+const newTemplateModalActive = ref(false);
+const toggleNewTemplateModal = () => {
+    templates.value = projectStore.getTemplates();
+    templates.value = templates.value.filter(x => x.ID != 58)
+    newTemplateModalActive.value = !newTemplateModalActive.value;
+}
+
+const templateToEdit = ref('')
 
 const adminOldPassword = ref('');
 const adminNewPassword = ref('');
@@ -151,6 +227,17 @@ async function changeSuperAdminPassword() {
 .basicButton {
     padding: 5px;
     margin-top: 5px;
+    color: black;
+    background-color: lightgray;
+    text-decoration: none;
+    border-width: 2px;
+    font-size: 16px;
+    padding: 8px;
+    margin: 1px;
+    border-style: outset;
+    border-color: black;
+    border-image: initial;
+    cursor: pointer;
 }
 
 .link-wrapper {
@@ -158,5 +245,12 @@ async function changeSuperAdminPassword() {
     flex-direction: column;
     gap: 10px;
     width: fit-content;
+}
+
+.input-field1{
+  height: 30px;
+  width: 30%;
+  font-size: 16px;
+  padding: 2px;
 }
 </style>

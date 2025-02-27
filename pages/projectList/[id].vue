@@ -358,8 +358,6 @@ const submitStages = () => {
   console.log('Submitted stages:', stages.value);
 
   gateStore.submitStages(project.value.id, stages.value.map(stage => stage.selectedNumber));
-  console.log("SENDING VALUES: " + project.value.id + " AND ")
-  console.log(stages.value)
   stagesStore.addStages(project.value.id, stages.value)
   toggleEditStages();
 };

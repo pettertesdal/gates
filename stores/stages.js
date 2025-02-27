@@ -21,8 +21,6 @@ export const useStageStore = defineStore('stages', () => {
             }));
             stages.value = stagesArray;
 
-            console.log("STAGES IN DATABASE: ", stages.value)
-
         } catch (error) {
             console.error('Error fetching stages', error)
         }
@@ -40,8 +38,6 @@ export const useStageStore = defineStore('stages', () => {
     }
 
     async function addStages(projectID, stageArray) {
-        console.log("STAGEARRY IN STORE: ")
-        console.log(stageArray)
         try {
             await deleteStages(projectID); // Delete old stages first
             const response = await fetch('/stages', {

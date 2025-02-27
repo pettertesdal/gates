@@ -64,10 +64,9 @@ const toggleModal2 = () => {
 
 function deleteTeam() {
     let input = inputtext.value;
-    if (input == inputstring) { // this needs implementation.
+    if (input == inputstring) {
         console.log("deleting team..")
         console.log(props.entryData.id)
-        //I'll add this logic myself.
         modalActive2.value = false;
         teamStore.deleteTeam(props.entryData.id)
     } else {
