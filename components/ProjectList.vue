@@ -26,6 +26,10 @@
           <input type="date" id="SF" v-model="formData.SF" required><br>
           <label>PEM: </label>
           <input type="text" id="PEM" v-model="formData.PEM" required><br>
+          <label>Template: </label>
+          <select>
+            <option>Default for team</option>
+          </select><br>
           <button type="submit" class="addButton">Create Project</button>
         </form>
         <button class="closeButton" @click="toggleModal">Cancel</button>
