@@ -58,6 +58,7 @@ const filteredProjects = computed(() => {
         const isPoDatePassed = poDate < today;
         const isOnTimeDatePassed = onTimeDate < today;
         const isSfDateMoreThan30DaysAfterPo = (sfDate - poDate) / (1000 * 60 * 60 * 24) > 30;
+        
         var isProgressLessThan100 = false
 
         
