@@ -46,6 +46,7 @@ import { useIntervalFn } from '@vueuse/core' // VueUse helper, install it
 const store = useProjectsStore();
 const gateStore = useGatesStore();
 const authStore = useAuthStore();
+const stagesStore = useStageStore();
 
 const projects = ref([]);
 const index = ref(0);
@@ -80,6 +81,7 @@ const paginatedProjects = computed(() => {
 
 onMounted(() => {
   fetchProjects();
+  stagesStore.fetchStages();
 });
 
 watchEffect(() => {
@@ -97,6 +99,7 @@ const submitForm = () => {
   const projectId = uuid();
   store.addProject(projectId, formData.value.title, 0, formData.value.SF.toString().replace(/-/g, ''), formData.value.PO.toString().replace(/-/g, ''), true, formData.value.PEM, "comment");
   index.value++;
+  stagesStore.fetchStages();
   toggleModal();
 };
 

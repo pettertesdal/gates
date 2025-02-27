@@ -82,27 +82,50 @@
           <button @click="toggleModal" class="cancelButton">No</button>
         </ReusableModal>
       </div>
+
+      <!-- Project Settings Modal -->
       <ReusableModal @close="toggleSettingsModal" :modalActive="settingsModalActive" v-if="admin">
         <h1>Project Settings</h1>
-
-        <!-- Label showing the amount of stages -->
-        <div class="stages-count">
-          <label>Amount of project stages: {{ stages.length + 1 }}</label>
-        </div>
-
 
         <!-- Hide the form if edit stages is unpressed -->
         <div v-if="editStages">
 
-          <div v-if="stages.length != 0" class="form-group">Stage 1 start gate: 1</div>
+          <!-- Label showing the amount of stages -->
+          <div class="stages-count">
+            <label>New amount of project stages: {{ stages.length }}</label>
+          </div>
 
           <!-- Form for stage gates -->
           <form @submit.prevent="submitStages">
             <div class="form-group" v-for="(stage, index) in stages" :key="index">
-              <label :for="'stageStart-' + (index + 2)">
-                Stage {{ index + 2 }} start gate:
+              <label :for="'stageStart-' + (index + 1)">
+                Stage {{ index + 1 }} start gate:
               </label>
-              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index]" min="0" required />
+
+              <!-- Stage start input -->
+              <input type="number" :id="'stageStart-' + (index + 2)" v-model="stages[index].selectedNumber" min="1" required class="stage-input" />
+
+              <!-- Form for color-selection -->
+              <select v-model="stage.color" class="color-input">
+                <option v-for="color in colors" :key="color.id" :value="color.hex">
+                  {{ color.name }}
+                </option>
+              </select>
+
+              <!-- Stage name and weight -->
+              <input type="string" class="name-input" placeholder="name" v-model="stage.name" required/>
+              <div class="tooltip-container">
+                🛈
+                <div class="tooltiptext">Stage name should be shorthand or abbreviated.</div>
+              </div>
+
+              <input type="number" class="weight-input" min="0" placeholder="width" default="1" v-model="stage.weight" required/>
+              <div class="tooltip-container">
+                🛈
+                <div class="tooltiptext">Enter a number to weight the size of this bar compared to the others.</div>
+              </div>
+
+              <!-- Remove stage from form-->
               <button type="button" @click="removeStage(index)" class="removeButton">-</button>
             </div>
 
@@ -158,11 +181,14 @@ import { useProjectsStore } from '@/stores/projects';
 import { useGatesStore } from '@/stores/gates';
 import { useTasksStore } from '@/stores/tasks';
 import { computed, watch, onMounted } from 'vue';
+import { useStageStore } from '~/stores/stages';
 
 const store = useProjectsStore();
 const gateStore = useGatesStore();
 const taskStore = useTasksStore();
 const authStore = useAuthStore();
+const colorStore = useColorStore();
+const stagesStore = useStageStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -180,6 +206,7 @@ const poFloat = ref(0);
 const daysToPO = computed(() => calculateDaysToPO());
 const admin = computed(() => authStore.isAdmin());
 const editStages = ref(false);
+var colors;
 
 const enableEditTitleMode = () => {
   editTitleMode.value = true;
@@ -255,6 +282,13 @@ onMounted(async () => {
   }
 
   try {
+    await colorStore.fetchColors();
+    colors = colorStore.getColors()
+  } catch (error) {
+    console.error('Error fetching colors in palette', error)
+  }
+
+  try {
     const fetchedProject = await store.getProjectById(projectId);
     if (fetchedProject) {
       project.value = fetchedProject;
@@ -291,7 +325,12 @@ const stages = ref([]);
 
 // Function to add a new stage
 const addStage = () => {
-  stages.value.push(0); // Adds a stage with a default value of 0
+  stages.value.push({
+    selectedNumber: null,
+    name: '',
+    color: '',
+    weight: ''
+  }); 
 };
 
 // Function to remove a stage
@@ -304,15 +343,9 @@ const removeStage = (index) => {
 // Submit form logic
 // Function to validate that stages are greater than 1 and in ascending order
 const validateStages = () => {
-  // Check if all stages are greater than 1
-  const allGreaterThanOne = stages.value.every(stage => stage > 1);
-
-  // Check if the stages are in ascending order
-  const isAscending = stages.value.every((stage, index) => {
-    return index === 0 || stage > stages.value[index - 1];
+  return stages.value.every((stage, index) => {
+    return (index === 0 && stage.selectedNumber === 1) || stage.selectedNumber > stages.value[index - 1].selectedNumber;
   });
-
-  return allGreaterThanOne && isAscending;
 };
 
 // Submit form logic with validation
@@ -322,11 +355,12 @@ const submitStages = () => {
     return;
   }
 
-  const stagesWithStartGate = [1, ...stages.value];
-  console.log('Submitted stages:', stagesWithStartGate);
-  console.log('Project ID:', project.value.id);
+  console.log('Submitted stages:', stages.value);
 
-  gateStore.submitStages(project.value.id, stagesWithStartGate);
+  gateStore.submitStages(project.value.id, stages.value.map(stage => stage.selectedNumber));
+  console.log("SENDING VALUES: " + project.value.id + " AND ")
+  console.log(stages.value)
+  stagesStore.addStages(project.value.id, stages.value)
   toggleEditStages();
 };
 
@@ -737,5 +771,54 @@ h1 {
 .button-container {
   margin-top: 0px;
   text-align: right;
+}
+
+.name-input {
+  width: 7%;
+  padding: 3px;
+  margin-left: 10px;
+}
+
+.tooltip-container {
+ position: relative;
+ display: inline-block;
+ background: transparent;
+ border-left: 0px;
+ margin-left: 5px;
+}
+.tooltiptext {
+ opacity: 0; /* Initially hidden */
+ width: 130px;
+ background-color: black;
+ color: #fff;
+ border-radius: 6px;
+ padding: 5px 10px;
+ /* Position the tooltip */
+ position: absolute;
+ z-index: 1;
+ transition: opacity 0.3s ease-in-out, visibility 0s linear 0.5s; /* Delay tooltip visibility */
+ visibility: hidden; /* Keep it hidden initially */
+}
+.tooltip-container:hover .tooltiptext {
+ opacity: 1;
+ visibility: visible; /* Make it visible */
+ transition-delay: 0.2s; /* Remove delay when showing */
+}
+
+.weight-input {
+  width: 8%;
+  margin-left: 10px;
+  padding: 3px;
+}
+
+.color-input {
+  width: 15%;
+  margin-left: 10px;
+  padding: 3px;
+}
+
+.stage-input {
+  width: 5%;
+  padding: 3px;
 }
 </style>

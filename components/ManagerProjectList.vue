@@ -58,9 +58,18 @@ const filteredProjects = computed(() => {
         const isPoDatePassed = poDate < today;
         const isOnTimeDatePassed = onTimeDate < today;
         const isSfDateMoreThan30DaysAfterPo = (sfDate - poDate) / (1000 * 60 * 60 * 24) > 30;
-        const isProgressLessThan100 = progress < 100;
+        
+        var isProgressLessThan100 = false
+
+        
+        for(let p in progress) {
+            if(progress[p]<100) {
+                isProgressLessThan100 = true
+            }
+        }
+
         return !project.archive && !project.template &&
-            (isPoDatePassed || isOnTimeDatePassed || isSfDateMoreThan30DaysAfterPo || isProgressLessThan100);
+            ((isPoDatePassed || isOnTimeDatePassed || isSfDateMoreThan30DaysAfterPo) && isProgressLessThan100);
     });
 });
 

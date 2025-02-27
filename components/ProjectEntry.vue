@@ -4,7 +4,7 @@
       <span>{{ entryData.title }}</span>
     </div>
     <div class="progressWrapper">
-      <ProgressBar :progressNumber="entryData.progress" />
+      <ProgressBar :projectID="entryData.id" :progressNumber="entryData.progress" />
     </div>
     <div class="dateWrapper" :class="{ 'late': !fullProgress && islate, 'onTime': !fullProgress && !islate, 'fullProgressSF': fullProgress }">
       <DateEntry :dateString="entryData.SFdate" />
