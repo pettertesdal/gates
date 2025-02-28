@@ -135,6 +135,9 @@ const toggleAdmModal = () => {
 const submitForm = () => {
     console.log("New Template Values: ", copyTemplateID.value, newTemplateTitle.value, newTemplateTeam.value)
     projectStore.addTemplate(copyTemplateID.value, newTemplateTitle.value, newTemplateTeam.value);
+    newTemplateModalActive.value = !newTemplateModalActive.value;
+    projectStore.fetchTemplates();
+    templates.value = projectStore.getTemplates();
 };
 
 const superModalActive = ref(false);
