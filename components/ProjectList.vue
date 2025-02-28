@@ -18,14 +18,20 @@
       <Modal @close="toggleModal" :modalActive="modalActive">
         <h1>New Project</h1>
         <form @submit.prevent="submitForm">
-          <label>Project title: </label>
-          <input type="text" id="title" v-model="formData.title" required><br>
-          <label>PO-date: </label>
-          <input type="date" id="PO" v-model="formData.PO" required><br>
-          <label>Scheduled finish: </label>
-          <input type="date" id="SF" v-model="formData.SF" required><br>
-          <label>PEM: </label>
-          <input type="text" id="PEM" v-model="formData.PEM" required><br>
+          <label class="input-label">Project title: </label><br>
+          <input type="text" id="title" v-model="formData.title" required class="input-field2"><br>
+          <label class="input-label">PO-date: </label><br>
+          <input type="date" id="PO" v-model="formData.PO" required class="input-field1"><br>
+          <label class="input-label">Scheduled finish: </label><br>
+          <input type="date" id="SF" v-model="formData.SF" required class="input-field1"><br>
+          <label class="input-label">PEM: </label><br>
+          <input type="text" id="PEM" v-model="formData.PEM" required class="input-field2"><br>
+          <label class="input-label">Template to copy: </label><br>
+          <select v-model="formData.template" required class="input-field1">
+            <option v-for="template in templates" :key="template.ID" :value="template.ID"> 
+              {{teamStore.getTeamName(template.team) + ": " + template.title }}
+            </option>
+          </select><br>
           <button type="submit" class="addButton">Create Project</button>
         </form>
         <button class="closeButton" @click="toggleModal">Cancel</button>
@@ -47,9 +53,11 @@ const store = useProjectsStore();
 const gateStore = useGatesStore();
 const authStore = useAuthStore();
 const stagesStore = useStageStore();
+const teamStore = useTeamsStore();
 
 const projects = ref([]);
 const index = ref(0);
+const templates = ref([])
 
 const currentPage = ref(1);
 const projectsPerPage = 25;
@@ -62,8 +70,11 @@ useIntervalFn(() => {
 }, 120000)
 
 const fetchProjects = () => {
+  store.fetchTemplates();
+  stagesStore.fetchStages();
   store.fetchProjects();
   projects.value = store.getProjects();
+  templates.value = store.getTemplates().filter(x => x.ID != 58);
 };
 
 const filteredProjects = computed(() => {
@@ -81,23 +92,24 @@ const paginatedProjects = computed(() => {
 
 onMounted(() => {
   fetchProjects();
-  stagesStore.fetchStages();
 });
 
 watchEffect(() => {
   projects.value = store.getProjects();
+  templates.value = store.getTemplates().filter(x => x.ID != 58);
 });
 
 const formData = ref({
   title: '',
   PO: '',
   SF: '',
-  PEM: ''
+  PEM: '',
+  template: ''
 });
 
 const submitForm = () => {
   const projectId = uuid();
-  store.addProject(projectId, formData.value.title, 0, formData.value.SF.toString().replace(/-/g, ''), formData.value.PO.toString().replace(/-/g, ''), true, formData.value.PEM, "comment");
+  store.addProject(projectId, formData.value.template, formData.value.title, 0, formData.value.SF.toString().replace(/-/g, ''), formData.value.PO.toString().replace(/-/g, ''), true, formData.value.PEM, "comment");
   index.value++;
   stagesStore.fetchStages();
   toggleModal();
@@ -108,7 +120,6 @@ projects.value = store.getProjects();
 const modalActive = ref(false);
 const toggleModal = () => {
   modalActive.value = !modalActive.value;
-  console.log(projects.value)
 };
 
 const prevPage = () => {
@@ -164,6 +175,24 @@ const nextPage = () => {
 .pagination button:disabled {
   background-color: #888;
   cursor: not-allowed;
+}
+
+.input-field1{
+  height: 24px;
+  width: 30%;
+  font-size: 16px;
+  padding: 2px;
+}
+
+.input-field2{
+  height: 24px;
+  width: 50%;
+  font-size: 16px;
+  padding: 2px;
+}
+
+.input-label{
+  height: 250px;
 }
 
 hr.solid {

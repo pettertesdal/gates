@@ -43,8 +43,6 @@ const props = defineProps({
     required: true
   }
 });
-console.log(props)
-
 const router = useRouter();
 const store = useProjectsStore();
 

@@ -80,7 +80,6 @@ const getStageName = (index) => {
 
 // Adjust width of each bar based on stage weight
 const getStageWeight = (index) => {
-  console.log(projectStages.value[index])
   return projectStages.value[index]?.weight || 1; // Default weight is 1
 };
 </script>

@@ -11,19 +11,7 @@
       <NuxtLink to="/cookiepolicy" class="link-button">Cookie Policy</NuxtLink>
       <NuxtLink to="/userManual" class="link-button">User Manual</NuxtLink>
     </div>
-    
-    <ReusableModal @close="toggleModal" :modalActive="modalActive">
-      <div class="modal-content">
-        <h2>Warning</h2>
-        <p>You are about to edit the template. This action can affect the entire system configuration and changes are final. Are you sure you want to proceed?</p>
-        <div class="modal-actions">
-          <button @click="confirmEditTemplate" class="confirm-button">Yes, proceed</button>
-          <button @click="toggleModal" class="cancel-button">Cancel</button>
-        </div>
-      </div>
-    </ReusableModal>
-    
-    <button v-if="admin" @click="toggleModal" class="edit-button">Edit Template</button>
+
   </div>
 </template>
 
