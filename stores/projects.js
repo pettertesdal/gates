@@ -436,7 +436,7 @@ export const useProjectsStore = defineStore('projects', () => {
     }
 
     async function deleteProject(deleteID) {
-        if (deleteID == 1 || deleteID=80){
+        if (Number(deleteID) === 1){
             throw new Error("Can not delete root project")
         }
         try {
