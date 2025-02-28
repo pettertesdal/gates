@@ -49,14 +49,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
 import { useTasksStore } from '@/stores/tasks';
 import { useGatesStore } from '@/stores/gates';
-import ProgressBar from '@/components/ProgressBar.vue';
-import DateEntry from '@/components/DateEntry.vue';
-import CollapseTransition from '@/components/CollapseTransition.vue';
-import GateContent from '@/components/GateContent.vue';
-import ReusableModal from '@/components/ReusableModal.vue';
 
 const props = defineProps({
   gateID: {

@@ -88,9 +88,11 @@ const updateComment = async () => {
 
 // Compute the project status
 const calculateStatus = computed(() => {
-  if (fullProgress) {
+  if (fullProgress.value) {
     const onTimeDate = new Date(props.entryData.onTimeDate);
-    return onTimeDate < new Date(props.entryData.POdate);
+    const sfdateobject = new Date(props.entryData.SFdate)
+    console.log("The boolean: " + (onTimeDate < sfdateobject) + " ontime: " + onTimeDate + " poDate: " + sfdateobject + "ProjectId: " + props.entryData.id + "fullProgress: " + fullProgress.value)
+    return onTimeDate < sfdateobject;
   }
   else {
     const today = new Date();

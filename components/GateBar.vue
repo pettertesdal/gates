@@ -3,18 +3,15 @@
         <div v-if="isArray" class="progress-container">
             <div
                 v-for="(progress, index) in progressNumber"
-
                 :key="index"
-
                 class="progress-bar"
-
                 :class="getBarClass(index)"
             >
                 <div class="filled-bar" :style="{ width: (progress || 0) + '%' }"></div>
             </div>
         </div>
 
-        <div v-else class="progress-bar single">
+        <div v-else class="progress-bar">
             <div class="filled-bar" :style="{ width: progressNumber + '%' }"></div>
         </div>
     </div>
@@ -25,15 +22,10 @@
 
 <script setup>
 const props = defineProps({
-
     progressNumber: {
-
         type: [Array, Number], // Accept either an array or a number
-
         default: () => [],
-
     },
-
 });
 
 const isArray = computed(() => {
@@ -68,10 +60,7 @@ const hasProgress = computed(() => {
 .filled-bar {
   height: 100%;
   border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
+  background-color: #76c7c0;
   font-weight: bold;
   font-size: 0.8rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
