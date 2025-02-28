@@ -274,7 +274,16 @@ const removeStage = (index) => {
 // Function to validate that stages are greater than 1 and in ascending order
 const validateStages = () => {
   return stages.value.every((stage, index) => {
-    return (index === 0 && stage.selectedNumber === 1) || stage.selectedNumber > stages.value[index - 1].selectedNumber;
+    if(index === 0 && stage.selectedNumber != 1) {
+      alert("Stage 1 will have to start at gate 1!")
+      return false
+    }
+    if ((index === 0 && stage.selectedNumber === 1) || stage.selectedNumber > stages.value[index - 1].selectedNumber) {
+      return true
+    } else {
+      alert('Stages validation failed: stages must be in ascending order.');
+      return false;
+    }
   });
 };
 
