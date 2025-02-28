@@ -29,6 +29,7 @@ const store = useProjectsStore();
 const projects = ref(store.getProjects());
 const authStore = useAuthStore();
 const teamStore = useTeamsStore();
+const stagesStore = useStageStore();
 
 const teamName = computed(() => {
   const userTeam = authStore.getUserTeam();
@@ -54,6 +55,7 @@ onMounted(() => {
   if (store.getProjects().length === 1) {
     store.fetchProjects();
   }
+  stagesStore.fetchStages();
 });
 
 watchEffect(() => {

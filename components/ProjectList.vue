@@ -97,6 +97,7 @@ onMounted(() => {
 watchEffect(() => {
   projects.value = store.getProjects();
   templates.value = store.getTemplates().filter(x => x.ID != 58);
+  stagesStore.getStages();
 });
 
 const formData = ref({
