@@ -126,7 +126,8 @@
         1. Navigate to the dashboard. Make sure you are in the correct team by looking at the teamname in the top right corner<br>
         2. Press "Add Project" in the bottom left underneath the projects<br>
         3. Add project title, PO-date, Scheduled Finish and PEM<br>
-        4. Press "Create Project"<br>
+        4. Choose what template to use to create the project<br>
+        5. Press "Create Project"<br>
         Your new project should instantly appear in the projectlist on the dashboard and in the sidebar.
     </p>
     <h4 @click="toggleVisibility('deleteProject')">
@@ -293,9 +294,38 @@
         3. Drag your task to the desired position and let go of the left mouse button<br>
         The "Step" of the task should update accoridngly
     </p>
+    <h4 @click="toggleVisibility('taskPosition')">
+        Edit the stages of gates<span>{{ visibleSections.taskPosition ? '↓' : '→' }}</span>
+    </h4>
+    <p v-show="visibleSections.taskPosition">
+        When you view a project on the dashboard we can see multiple bars on one line, these are stages
+        Each bar has a weight and represents certain gates in that project
+        You can edit how these stages look and act inside of a project or template
+        1. Click in on a project or template
+        2. Click the button in the lower left corner called "Project Settings"
+        3. edit stages
+        4. click the pluss icon to make a stage, these each represents on bar
+        5. Write down on what gate the stage should start, but you have to have one stage that starts at 1
+        6. Choose what color the stage bar should have (colors can be added in the admin page)
+        7. Choose the name of the stage (this will be listed in the bar itself)
+        8. set the weight of the bar
+        The weight of a bar is how much space the bar should take, a stage with weight 4 will have 2 times the size of a stage with weight 1
+    </p>
+
     <br>
     <h3 style="color:green">Superadmin</h3>
 
+    <h4 @click="toggleVisibility('templateCreate')">
+        Create a new template<span>{{ visibleSections.templateCreate? '↓' : '→' }}</span>
+    </h4>
+    <p v-show="visibleSections.templateCreate">
+        1. Navigate to the admin page<br>
+        2. Click on the "Add a new Template" tab<br>
+        3. Write down the name<br>
+        4. Choose a template base, whether it is empty or clone an existing template<br>
+        5. Choose what team the template is related to<br>
+        Remember that the stages of the project, are easiest to decide here, than later on in one single project
+    </p>
     <h4 @click="toggleVisibility('userList')">
         See list of users<span>{{ visibleSections.userList ? '↓' : '→' }}</span>
     </h4>
