@@ -138,11 +138,14 @@
   height: 50px;
   cursor: copy;
   background-color: transparent;
+  width: 100%;
 }
 
 .emptylist {
   flex-direction: column;
   margin: auto;
+  width: 100%;
+  text-align: center;
 }
 
 .cursorDefault {

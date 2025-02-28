@@ -308,21 +308,19 @@ export const useProjectsStore = defineStore('projects', () => {
     function sortProjects(comparator) {
         if (comparator == undefined && projectSorting.value) {
             projects.value.sort(projectSorting.value)
-            if (managerProjects.value.length > 0) {
-                managerProjects.value.sort(projectSorting.value)
-            }
+            managerProjects.value.sort(projectSorting.value)
+            
             return;
         } else if (comparator == undefined) {
             console.log("comparator is not undefined")
             projects.value.sort((a, b) => false ? a['SFdate'] - b['SFdate'] : a['SFdate'].localeCompare(b['SFdate']))
-            if (managerProjects.value.length > 0) {
-                managerProjects.value.sort((a, b) => false ? a['SFdate'] - b['SFdate'] : a['SFdate'].localeCompare(b['SFdate']))
-            }
-            // Legg inn her hvis vi vil ha en "default" sortering
+            managerProjects.value.sort((a, b) => false ? a['SFdate'] - b['SFdate'] : a['SFdate'].localeCompare(b['SFdate']))
+            
             return;
         }
         projectSorting.value = comparator;
         projects.value.sort(comparator);
+        managerProjects.value.sort(comparator)
     }
 
     function getPODate(projectID) {
@@ -396,7 +394,6 @@ export const useProjectsStore = defineStore('projects', () => {
 
     async function addTemplate(copyID ,title, team) {
         const authStore = useAuthStore();
-        const userTeam = authStore.getUserTeam();
 
         const requestBody = {
             ID: Number(copyID),

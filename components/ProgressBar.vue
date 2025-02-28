@@ -93,7 +93,7 @@ const getStageWeight = (index) => {
 }
 
 .progress-bar {
-  background-color: #e0e0e0;
+  background-color: #f5f5f5;
   height: 25px;
   border-radius: 5px;
   border: 1px solid #b0b0b0;
