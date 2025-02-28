@@ -16,7 +16,7 @@
         <input v-model="editedTitle" @keyup.enter="updateTitle" @blur="updateTitle" />
       </div>
       <div class="progress">
-        <ProgressBar :progressNumber="gateProgress" />
+        <GateBar :progressNumber="gateProgress" />
       </div>
       <div class="plannedDate">
         <DateEntry :dateString="plannedDate" />
