@@ -83,7 +83,7 @@
       <div class="separator-line"></div>
 
         <div class="button-container">
-          <button v-if="admin" @click="toggleModal" type="button" class="customButton deleteColor">Delete
+          <button v-if="admin && project.id != 1" @click="toggleModal" type="button" class="customButton deleteColor">Delete
             project</button>
           <div class="separator-line"></div>
           <div class="button-container">
