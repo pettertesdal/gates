@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     dbEncrypt: process.env.NUXT_DB_ENCRYPT,
     tokenSecret: process.env.NUXT_TOKEN_SECRET,
     tokenExpiration: process.env.NUXT_TOKEN_EXPIRATION,
+    use_Mock_DB: process.env.NUXT_USE_MOCK_DB,
   },
 
   modules: [

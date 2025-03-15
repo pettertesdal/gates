@@ -136,7 +136,6 @@ export const useAuthStore = defineStore('auth', () => {
             let response = await fetchAccess(newUsername);
             if (!response) {
                 clearUserData();
-                console.log('We are here');
                 invalidUsername.value = true;
                 return false;
             } else if (response.role == 1) {

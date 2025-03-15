@@ -1,23 +1,36 @@
-export default defineEventHandler(async event => {
-  let newRole;
+import { mockValidUsers } from '~/server/mockDatabase/users';
+
+export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
     const { username } = body;
-    // Querying the role
-    const result = await connectAndQuery(`SELECT role, team FROM [db_owner].[validUsers] WHERE username = '${username}'`)
 
+    let newRole;
 
-    newRole = result[0];
+    if (process.env.USE_MOCK_DB) {
+      // Mocked Data
+      newRole = mockValidUsers.find(user => user.username === username);
+    } else {
+      // Real Database Query
+      const result = await connectAndQuery(
+        `SELECT role, team FROM [db_owner].[validUsers] WHERE username = '${username}'`
+      );
+      newRole = result[0];
+    }
 
-    // Returning only the first match for the name
-    return (newRole)
+    if (!newRole) {
+      return createError({
+        statusCode: 404,
+        statusMessage: 'User not found',
+      });
+    }
+
+    return newRole;
   } catch (error) {
-    // If there's an error during the database operation, return an internal server error
-    console.error('Failed validify user:', error);
+    console.error('Failed to validate user:', error);
     return createError({
       statusCode: 500,
       statusMessage: 'Internal Server Error',
     });
   }
 });
-
