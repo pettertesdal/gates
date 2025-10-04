@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.DS_Store
+.nuxt
+.output
+.git
+.gitignore
+dist
+coverage
+.idea
+.vscode
+*.local
