@@ -32,6 +32,22 @@ Den medfølgende init-scriptet oppretter nødvendige tabeller, visninger og pros
 
 Vanlige brukere identifiseres kun med brukernavn, mens administrator og superadministrator må oppgi passord ved innlogging.
 
+## CI/CD og utrulling til VPS
+
+Repositoryet inneholder en GitHub Actions-workflow (`.github/workflows/deploy.yml`) som bygger og publiserer Docker-avbildninger hver gang `main`-grenen oppdateres. Workflowen:
+
+1. Logger inn mot GitHub Container Registry (GHCR) med `GITHUB_TOKEN`.
+2. Bygger produksjonsvarianten av applikasjonsavbildningen (`ghcr.io/<eier>/gates-app`) og SQL Server-avbildningen (`ghcr.io/<eier>/gates-sqlserver`), tagget med både `latest` og commit-SHA.
+3. Utfører en SSH-deploy til en VPS dersom hemmelighetene `VPS_HOST`, `VPS_USER` og `SSH_PRIVATE_KEY` er konfigurert. På serveren forventes et oppsett i `~/docker/gates` som kan oppdateres med `docker compose pull` og `docker compose up -d`.
+
+### Nødvendige hemmeligheter
+
+- `VPS_HOST`: IP eller hostname til serveren som skal oppdateres.
+- `VPS_USER`: Brukeren workflowen skal logge inn som.
+- `SSH_PRIVATE_KEY`: Privatnøkkel (typisk i PEM-format) for innlogging på serveren.
+
+Dersom en eller flere av disse hemmelighetene ikke er satt, hoppes deploy-trinnet over, men containerne pushes fortsatt til GHCR slik at de kan hentes manuelt.
+
 
 
 # Nuxt 3 Minimal Starter
