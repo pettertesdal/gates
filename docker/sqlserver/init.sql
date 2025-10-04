@@ -86,7 +86,7 @@ IF NOT EXISTS (SELECT 1 FROM db_owner.validUsers)
 BEGIN
     INSERT INTO db_owner.validUsers (username, team, role)
     VALUES (N'admin', 1, 1),
-           (N'po-user', 2, 2);
+           (N'user', 1, 3);
 END;
 GO
 
@@ -114,7 +114,7 @@ GO
 IF NOT EXISTS (SELECT 1 FROM db_owner.admin_pass)
 BEGIN
     INSERT INTO db_owner.admin_pass (role, pass)
-    VALUES (1, N'admin'), (2, N'owner'), (3, N'member');
+    VALUES (1, N'admin'), (2, N'owner'), (3, N'user');
 END;
 GO
 
