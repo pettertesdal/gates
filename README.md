@@ -7,7 +7,7 @@ Når de korrekte avhengigheter er innstallert kjøres applikasjonen ved kommando
 
 # Docker-basert utviklingsmiljø
 
-Prosjektet kan nå kjøres lokalt med Docker og Docker Compose. Dette starter både applikasjonen og en SQL Server-instans med en ferdig konfigurert database.
+Prosjektet kan nå kjøres lokalt med Docker og Docker Compose. Dette starter både applikasjonen og en SQL Server-instans med en ferdig konfigurert database. Compose bygger en lokal SQL Server-avbildning som inkluderer `sqlcmd`, siden det ikke lenger leveres i den offisielle `mcr.microsoft.com/mssql/server:2022-latest`-avbildningen.
 
 1. Kopier `.env.example` til `.env` og juster eventuelle variabler ved behov.
 2. Start miljøet med:
@@ -19,6 +19,34 @@ Prosjektet kan nå kjøres lokalt med Docker og Docker Compose. Dette starter b�
    Tjenesten er tilgjengelig på [http://localhost:3000](http://localhost:3000) når byggingen er ferdig.
 
 Compose-oppsettet oppretter databasen `gates` med brukeren `gates_user`. Miljøvariablene `DB_SERVER`, `DB_NAME`, `DB_USER`, `DB_PASS` og `DB_PORT` brukes av Nuxt-applikasjonen for å koble til databasen. Standardverdiene fungerer direkte mot Docker Compose-konfigurasjonen.
+
+For innlogging og sesjonshåndtering brukes JSON Web Tokens. Sett `NUXT_TOKEN_SECRET` til en valgfri streng for å signere tokenene og `NUXT_TOKEN_EXPIRATION` til ønsket gyldighetstid (for eksempel `12h`). Docker Compose-konfigurasjonen fyller inn sikre standardverdier dersom variablene ikke er definert.
+
+Den medfølgende init-scriptet oppretter nødvendige tabeller, visninger og prosedyrer som applikasjonen forventer (bl.a. `validUsers`, `user_teams`, `user_roles`, `projectModel`, `DuplicateProject` m.m.) og fyller dem med et minimum av testdata. Etter oppstart finnes tre forhåndsopprettede brukere:
+
+| Rolle-ID | Brukernavn    | Passord        | Beskrivelse                |
+|----------|---------------|----------------|----------------------------|
+| 1        | `user`        | *(ikke nødvendig)* | Vanlig bruker uten passord |
+| 2        | `admin`       | `admin`        | Administrator               |
+| 3        | `superadmin`  | `superadmin`   | Superadministrator          |
+
+Vanlige brukere identifiseres kun med brukernavn, mens administrator og superadministrator må oppgi passord ved innlogging.
+
+## CI/CD og utrulling til VPS
+
+Repositoryet inneholder en GitHub Actions-workflow (`.github/workflows/deploy.yml`) som bygger og publiserer Docker-avbildninger hver gang `main`-grenen oppdateres. Workflowen:
+
+1. Logger inn mot GitHub Container Registry (GHCR) med `GITHUB_TOKEN`.
+2. Bygger produksjonsvarianten av applikasjonsavbildningen (`ghcr.io/<eier>/gates-app`) og SQL Server-avbildningen (`ghcr.io/<eier>/gates-sqlserver`), tagget med både `latest` og commit-SHA.
+3. Utfører en SSH-deploy til en VPS dersom hemmelighetene `VPS_HOST`, `VPS_USER` og `SSH_PRIVATE_KEY` er konfigurert. På serveren forventes et oppsett i `~/docker/gates` som kan oppdateres med `docker compose pull` og `docker compose up -d`.
+
+### Nødvendige hemmeligheter
+
+- `VPS_HOST`: IP eller hostname til serveren som skal oppdateres.
+- `VPS_USER`: Brukeren workflowen skal logge inn som.
+- `SSH_PRIVATE_KEY`: Privatnøkkel (typisk i PEM-format) for innlogging på serveren.
+
+Dersom en eller flere av disse hemmelighetene ikke er satt, hoppes deploy-trinnet over, men containerne pushes fortsatt til GHCR slik at de kan hentes manuelt.
 
 
 

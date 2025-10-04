@@ -11,8 +11,68 @@ export const useProjectsStore = defineStore('projects', () => {
     const templateProjects = ref([])
     const allProjects = ref([])
 
+    function toBoolean(value) {
+        if (typeof value === 'boolean') {
+            return value;
+        }
+
+        if (typeof value === 'number') {
+            return value !== 0;
+        }
+
+        if (typeof value === 'string') {
+            const normalized = value.trim().toLowerCase();
+            if (["true", "1", "yes", "y"].includes(normalized)) {
+                return true;
+            }
+            if (["false", "0", "no", "n"].includes(normalized)) {
+                return false;
+            }
+        }
+
+        return Boolean(value);
+    }
+
+    function mapProject(project) {
+        if (!project) {
+            return project;
+        }
+
+        return {
+            id: project.ID,
+            title: project.title,
+            progress: project.progress,
+            dividers: project.dividers,
+            onTimeDate: project.onTimeDate,
+            PEM: project.PEM,
+            comment: project.comment,
+            POdate: project.POdate,
+            SFdate: project.SFdate,
+            archive: toBoolean(project.archive),
+            gates: project.gates,
+            team: project.team,
+            template: toBoolean(project.template)
+        };
+    }
+
+    function normalizeProjectShape(project) {
+        if (!project) {
+            return project;
+        }
+
+        if (typeof project.id !== 'undefined') {
+            return {
+                ...project,
+                archive: toBoolean(project.archive),
+                template: toBoolean(project.template)
+            };
+        }
+
+        return mapProject(project);
+    }
+
     function setProjects(newProjects) {
-        projects.value = newProjects;
+        projects.value = newProjects.map(normalizeProjectShape);
         const templateProject = projects.value.find(project => project.template === true);
         if (templateProject) {
             templateId.value = templateProject.id;
@@ -20,7 +80,7 @@ export const useProjectsStore = defineStore('projects', () => {
     }
 
     function setManagerProjects(newProjects) {
-        managerProjects.value = newProjects;
+        managerProjects.value = newProjects.map(normalizeProjectShape);
     }
 
     async function fetchNonArchivedProjects() {
@@ -29,20 +89,7 @@ export const useProjectsStore = defineStore('projects', () => {
                 method: 'GET'
             });
             const data = response.data;
-            const projectsArray = Object.values(data).map(project => ({
-                id: project.ID,
-                title: project.title,
-                progress: project.progress,
-                onTimeDate: project.onTimeDate,
-                PEM: project.PEM,
-                comment: project.comment,
-                POdate: project.POdate,
-                SFdate: project.SFdate,
-                archive: project.archive,
-                gates: project.gates,
-                team: project.team,
-                template: project.template
-            }));
+            const projectsArray = Object.values(data).map(mapProject);
 
             setProjects(projectsArray);
 
@@ -63,23 +110,10 @@ export const useProjectsStore = defineStore('projects', () => {
                 method: 'GET'
             });
             const data = response.data;
-            const projectsArray = Object.values(data).map(project => ({
-                id: project.ID,
-                title: project.title,
-                progress: project.progress,
-                onTimeDate: project.onTimeDate,
-                PEM: project.PEM,
-                comment: project.comment,
-                POdate: project.POdate,
-                SFdate: project.SFdate,
-                archive: project.archive,
-                gates: project.gates,
-                team: project.team,
-                template: project.template
-            }));
+            const projectsArray = Object.values(data).map(mapProject);
 
             setManagerProjects(projectsArray);
-            allProjects.value = projectsArray;
+            allProjects.value = projectsArray.map(normalizeProjectShape);
         } catch (error) {
             console.error('Error fetching projects:', error);
         }
@@ -126,21 +160,7 @@ export const useProjectsStore = defineStore('projects', () => {
                 method: 'GET'
             });
             const data = response.data;
-            const projectsArray = Object.values(data).map(project => ({
-                id: project.ID,
-                title: project.title,
-                progress: project.progress,
-                dividers: project.dividers,
-                onTimeDate: project.onTimeDate,
-                PEM: project.PEM,
-                comment: project.comment,
-                POdate: project.POdate,
-                SFdate: project.SFdate,
-                archive: project.archive,
-                gates: project.gates,
-                team: project.team,
-                template: project.template
-            }));
+            const projectsArray = Object.values(data).map(mapProject);
 
             setProjects(projectsArray);
             sortProjects();
