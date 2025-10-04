@@ -6,8 +6,8 @@ export default defineNuxtConfig({
     dbName: process.env.NUXT_DB_NAME,
     dbPort: process.env.NUXT_DB_PORT,
     dbEncrypt: process.env.NUXT_DB_ENCRYPT,
-    tokenSecret: process.env.NUXT_TOKEN_SECRET,
-    tokenExpiration: process.env.NUXT_TOKEN_EXPIRATION,
+    tokenSecret: process.env.NUXT_TOKEN_SECRET || 'gates-dev-secret',
+    tokenExpiration: process.env.NUXT_TOKEN_EXPIRATION || '12h',
     use_Mock_DB: process.env.NUXT_USE_MOCK_DB,
   },
 
