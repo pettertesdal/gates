@@ -201,6 +201,7 @@ BEGIN
     CREATE TABLE db_owner.projectModel (
         ID INT IDENTITY(1,1) PRIMARY KEY,
         title NVARCHAR(255) NOT NULL,
+        progress DECIMAL(5,2) NOT NULL DEFAULT 0,
         onTimeDate DATE NULL,
         PEM NVARCHAR(255) NULL,
         COMMENT NVARCHAR(MAX) NULL,
@@ -217,9 +218,12 @@ IF OBJECT_ID(N'db_owner.gateModel', N'U') IS NULL
 BEGIN
     CREATE TABLE db_owner.gateModel (
         ID INT IDENTITY(1,1) PRIMARY KEY,
-        prosjektId INT NOT NULL REFERENCES db_owner.projectModel(ID),
-        stage INT NOT NULL,
-        gateTitle NVARCHAR(255) NOT NULL
+        prosjektID INT NOT NULL REFERENCES db_owner.projectModel(ID),
+        gateNR INT NOT NULL,
+        stage INT NOT NULL DEFAULT 1,
+        gateTitle NVARCHAR(255) NOT NULL,
+        progress INT NOT NULL DEFAULT 0,
+        latestDateOnTime DATE NULL
     );
 END;
 GO
@@ -234,8 +238,12 @@ BEGIN
         title NVARCHAR(255) NOT NULL,
         responsiblePerson NVARCHAR(255) NULL,
         onTimeDate DATE NULL,
+        onTime BIT NOT NULL DEFAULT 1,
         progress INT NOT NULL DEFAULT 0,
-        duration INT NOT NULL DEFAULT 0
+        duration INT NOT NULL DEFAULT 0,
+        comment NVARCHAR(MAX) NULL,
+        completeDate DATE NULL,
+        updateUser NVARCHAR(255) NULL
     );
 END;
 GO
@@ -265,30 +273,30 @@ GO
 
 IF NOT EXISTS (SELECT 1 FROM db_owner.projectModel)
 BEGIN
-    INSERT INTO db_owner.projectModel (title, onTimeDate, PEM, COMMENT, POdate, SFdate, archive, team, template)
-    VALUES (N'Sample Template Project', CAST(GETDATE() AS DATE), N'Jane Doe', N'Initial template project', CAST(GETDATE() AS DATE), DATEADD(DAY, 30, CAST(GETDATE() AS DATE)), N'false', 2, N'true');
+    INSERT INTO db_owner.projectModel (title, progress, onTimeDate, PEM, COMMENT, POdate, SFdate, archive, team, template)
+    VALUES (N'Sample Template Project', 0, CAST(GETDATE() AS DATE), N'Jane Doe', N'Initial template project', CAST(GETDATE() AS DATE), DATEADD(DAY, 30, CAST(GETDATE() AS DATE)), N'false', 2, N'true');
 END;
 GO
 
 DECLARE @TemplateProjectID INT = (SELECT TOP(1) ID FROM db_owner.projectModel WHERE template = N'true' ORDER BY ID);
 
-IF NOT EXISTS (SELECT 1 FROM db_owner.gateModel WHERE prosjektId = @TemplateProjectID)
+IF NOT EXISTS (SELECT 1 FROM db_owner.gateModel WHERE prosjektID = @TemplateProjectID)
 BEGIN
-    INSERT INTO db_owner.gateModel (prosjektId, stage, gateTitle)
-    VALUES (@TemplateProjectID, 1, N'Gate 1'),
-           (@TemplateProjectID, 2, N'Gate 2');
+    INSERT INTO db_owner.gateModel (prosjektID, gateNR, stage, gateTitle, progress)
+    VALUES (@TemplateProjectID, 1, 1, N'Gate 1', 0),
+           (@TemplateProjectID, 2, 2, N'Gate 2', 0);
 END;
 GO
 
 IF NOT EXISTS (SELECT 1 FROM db_owner.taskModel WHERE prosjektID = @TemplateProjectID)
 BEGIN
-    DECLARE @Gate1 INT = (SELECT TOP(1) ID FROM db_owner.gateModel WHERE prosjektId = @TemplateProjectID AND stage = 1);
-    DECLARE @Gate2 INT = (SELECT TOP(1) ID FROM db_owner.gateModel WHERE prosjektId = @TemplateProjectID AND stage = 2);
+    DECLARE @Gate1 INT = (SELECT TOP(1) ID FROM db_owner.gateModel WHERE prosjektID = @TemplateProjectID AND stage = 1);
+    DECLARE @Gate2 INT = (SELECT TOP(1) ID FROM db_owner.gateModel WHERE prosjektID = @TemplateProjectID AND stage = 2);
 
-    INSERT INTO db_owner.taskModel (prosjektID, gateID, step, title, responsiblePerson, onTimeDate, progress, duration)
-    VALUES (@TemplateProjectID, @Gate1, 1, N'Plan project scope', N'Alice', CAST(GETDATE() AS DATE), 50, 5),
-           (@TemplateProjectID, @Gate1, 2, N'Assemble team', N'Bob', DATEADD(DAY, 7, CAST(GETDATE() AS DATE)), 20, 10),
-           (@TemplateProjectID, @Gate2, 1, N'Execute deliverables', N'Charlie', DATEADD(DAY, 14, CAST(GETDATE() AS DATE)), 10, 15);
+    INSERT INTO db_owner.taskModel (prosjektID, gateID, step, title, responsiblePerson, onTimeDate, onTime, progress, duration, comment, completeDate, updateUser)
+    VALUES (@TemplateProjectID, @Gate1, 1, N'Plan project scope', N'Alice', CAST(GETDATE() AS DATE), 1, 50, 5, NULL, NULL, NULL),
+           (@TemplateProjectID, @Gate1, 2, N'Assemble team', N'Bob', DATEADD(DAY, 7, CAST(GETDATE() AS DATE)), 1, 20, 10, NULL, NULL, NULL),
+           (@TemplateProjectID, @Gate2, 1, N'Execute deliverables', N'Charlie', DATEADD(DAY, 14, CAST(GETDATE() AS DATE)), 1, 10, 15, NULL, NULL, NULL);
 END;
 GO
 
@@ -349,9 +357,10 @@ BEGIN
 
     DECLARE @TemplateValue NVARCHAR(5) = CASE WHEN @template = 1 THEN N'true' ELSE N'false' END;
 
-    INSERT INTO db_owner.projectModel (title, onTimeDate, PEM, COMMENT, POdate, SFdate, archive, team, template)
+    INSERT INTO db_owner.projectModel (title, progress, onTimeDate, PEM, COMMENT, POdate, SFdate, archive, team, template)
     SELECT
         @NewProjectTitle,
+        progress,
         onTimeDate,
         @PEMName,
         COMMENT,
@@ -365,12 +374,12 @@ BEGIN
 
     DECLARE @NewProjectID INT = SCOPE_IDENTITY();
 
-    INSERT INTO db_owner.gateModel (prosjektId, stage, gateTitle)
-    SELECT @NewProjectID, stage, gateTitle
+    INSERT INTO db_owner.gateModel (prosjektID, gateNR, stage, gateTitle, progress, latestDateOnTime)
+    SELECT @NewProjectID, gateNR, stage, gateTitle, 0, NULL
     FROM db_owner.gateModel
-    WHERE prosjektId = @OldProjectID;
+    WHERE prosjektID = @OldProjectID;
 
-    INSERT INTO db_owner.taskModel (prosjektID, gateID, step, title, responsiblePerson, onTimeDate, progress, duration)
+    INSERT INTO db_owner.taskModel (prosjektID, gateID, step, title, responsiblePerson, onTimeDate, onTime, progress, duration, comment, completeDate, updateUser)
     SELECT
         @NewProjectID,
         gNew.ID,
@@ -378,11 +387,15 @@ BEGIN
         t.title,
         t.responsiblePerson,
         t.onTimeDate,
+        t.onTime,
         0,
-        t.duration
+        t.duration,
+        t.comment,
+        NULL,
+        NULL
     FROM db_owner.taskModel t
     JOIN db_owner.gateModel gOld ON t.gateID = gOld.ID
-    JOIN db_owner.gateModel gNew ON gNew.prosjektId = @NewProjectID AND gNew.stage = gOld.stage
+    JOIN db_owner.gateModel gNew ON gNew.prosjektID = @NewProjectID AND gNew.stage = gOld.stage
     WHERE t.prosjektID = @OldProjectID;
 
     INSERT INTO db_owner.gatedivider (prosjektID, divider)
@@ -414,16 +427,16 @@ BEGIN
     SET NOCOUNT ON;
 
     UPDATE db_owner.gateModel
-    SET stage = stage + 1
-    WHERE prosjektId = @ProsjektID AND stage >= @GateNR;
+    SET gateNR = gateNR + 1
+    WHERE prosjektID = @ProsjektID AND gateNR >= @GateNR;
 
-    INSERT INTO db_owner.gateModel (prosjektId, stage, gateTitle)
-    VALUES (@ProsjektID, @GateNR, @GateTitle);
+    INSERT INTO db_owner.gateModel (prosjektID, gateNR, stage, gateTitle, progress, latestDateOnTime)
+    VALUES (@ProsjektID, @GateNR, @GateNR, @GateTitle, 0, NULL);
 
     DECLARE @NewGateID INT = SCOPE_IDENTITY();
 
-    INSERT INTO db_owner.taskModel (prosjektID, gateID, step, title, responsiblePerson, onTimeDate, progress, duration)
-    VALUES (@ProsjektID, @NewGateID, 1, CONCAT(@GateTitle, N' task'), NULL, NULL, 0, 0);
+    INSERT INTO db_owner.taskModel (prosjektID, gateID, step, title, responsiblePerson, onTimeDate, onTime, progress, duration, comment, completeDate, updateUser)
+    VALUES (@ProsjektID, @NewGateID, 1, CONCAT(@GateTitle, N' task'), NULL, NULL, 1, 0, 0, NULL, NULL, NULL);
 
     SELECT @NewGateID AS GateID;
 END;
