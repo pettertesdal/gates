@@ -27,6 +27,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # --- Build and push application image ---
       - name: Build and push application image
         uses: docker/build-push-action@v5
         with:
@@ -38,6 +39,7 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/gates-app:latest
             ghcr.io/${{ github.repository_owner }}/gates-app:${{ github.sha }}
 
+      # --- Build and push SQL Server image ---
       - name: Build and push SQL Server image
         uses: docker/build-push-action@v5
         with:
@@ -47,14 +49,19 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/gates-sqlserver:latest
             ghcr.io/${{ github.repository_owner }}/gates-sqlserver:${{ github.sha }}
 
+      # --- Deploy to VPS over SSH ---
       - name: SSH into VPS and deploy
-        if: ${{ secrets.VPS_HOST != '' && secrets.VPS_USER != '' && secrets.SSH_PRIVATE_KEY != '' }}
+        if: ${{ env.VPS_HOST && env.VPS_USER && env.SSH_PRIVATE_KEY }}
         uses: appleboy/ssh-action@v0.1.10
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/docker/gates
+            cd ~/docker/gates-app
             docker compose --profile prod pull
             docker compose --profile prod up -d
