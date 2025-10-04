@@ -60,7 +60,7 @@ services:
       [
         "/bin/bash",
         "-c",
-        "sqlcmd -S db -U sa -P \"$SA_PASSWORD\" -C -d master -i /init.sql",
+        "/opt/mssql-tools/bin/sqlcmd -S db -U sa -P \"$SA_PASSWORD\" -C -d master -i /init.sql",
       ]
     restart: "no"
 
