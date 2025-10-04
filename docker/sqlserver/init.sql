@@ -47,11 +47,39 @@ BEGIN
 END;
 GO
 
-IF NOT EXISTS (SELECT 1 FROM db_owner.user_roles)
+SET IDENTITY_INSERT db_owner.user_roles ON;
+
+IF EXISTS (SELECT 1 FROM db_owner.user_roles WHERE id = 1)
 BEGIN
-    INSERT INTO db_owner.user_roles (role)
-    VALUES (N'Administrator'), (N'Project Owner'), (N'Team Member');
+    UPDATE db_owner.user_roles SET role = N'User' WHERE id = 1;
+END
+ELSE
+BEGIN
+    INSERT INTO db_owner.user_roles (id, role)
+    VALUES (1, N'User');
 END;
+
+IF EXISTS (SELECT 1 FROM db_owner.user_roles WHERE id = 2)
+BEGIN
+    UPDATE db_owner.user_roles SET role = N'Admin' WHERE id = 2;
+END
+ELSE
+BEGIN
+    INSERT INTO db_owner.user_roles (id, role)
+    VALUES (2, N'Admin');
+END;
+
+IF EXISTS (SELECT 1 FROM db_owner.user_roles WHERE id = 3)
+BEGIN
+    UPDATE db_owner.user_roles SET role = N'Super Admin' WHERE id = 3;
+END
+ELSE
+BEGIN
+    INSERT INTO db_owner.user_roles (id, role)
+    VALUES (3, N'Super Admin');
+END;
+
+SET IDENTITY_INSERT db_owner.user_roles OFF;
 GO
 
 IF OBJECT_ID(N'db_owner.user_teams', N'U') IS NULL
@@ -82,12 +110,18 @@ BEGIN
 END;
 GO
 
-IF NOT EXISTS (SELECT 1 FROM db_owner.validUsers)
-BEGIN
-    INSERT INTO db_owner.validUsers (username, team, role)
-    VALUES (N'admin', 1, 1),
-           (N'user', 1, 3);
-END;
+MERGE db_owner.validUsers AS target
+USING (VALUES
+    (N'user', 1, 1),
+    (N'admin', 1, 2),
+    (N'superadmin', 1, 3)
+) AS source(username, team, role)
+ON target.username = source.username
+WHEN MATCHED THEN
+    UPDATE SET team = source.team, role = source.role
+WHEN NOT MATCHED THEN
+    INSERT (username, team, role)
+    VALUES (source.username, source.team, source.role);
 GO
 
 IF OBJECT_ID(N'db_owner.userRequests', N'U') IS NULL
@@ -111,10 +145,35 @@ BEGIN
 END;
 GO
 
-IF NOT EXISTS (SELECT 1 FROM db_owner.admin_pass)
+IF EXISTS (SELECT 1 FROM db_owner.admin_pass WHERE role = 1)
+BEGIN
+    DELETE FROM db_owner.admin_pass WHERE role = 1;
+END;
+
+IF EXISTS (SELECT 1 FROM db_owner.admin_pass WHERE role = 2)
+BEGIN
+    IF EXISTS (SELECT 1 FROM db_owner.admin_pass WHERE role = 2 AND pass IN (N'owner', N'admin'))
+    BEGIN
+        UPDATE db_owner.admin_pass SET pass = N'admin' WHERE role = 2;
+    END;
+END
+ELSE
 BEGIN
     INSERT INTO db_owner.admin_pass (role, pass)
-    VALUES (1, N'admin'), (2, N'owner'), (3, N'user');
+    VALUES (2, N'admin');
+END;
+
+IF EXISTS (SELECT 1 FROM db_owner.admin_pass WHERE role = 3)
+BEGIN
+    IF EXISTS (SELECT 1 FROM db_owner.admin_pass WHERE role = 3 AND pass IN (N'user', N'superadmin'))
+    BEGIN
+        UPDATE db_owner.admin_pass SET pass = N'superadmin' WHERE role = 3;
+    END;
+END
+ELSE
+BEGIN
+    INSERT INTO db_owner.admin_pass (role, pass)
+    VALUES (3, N'superadmin');
 END;
 GO
 

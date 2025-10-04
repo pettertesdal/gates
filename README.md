@@ -20,7 +20,15 @@ Prosjektet kan nå kjøres lokalt med Docker og Docker Compose. Dette starter b�
 
 Compose-oppsettet oppretter databasen `gates` med brukeren `gates_user`. Miljøvariablene `DB_SERVER`, `DB_NAME`, `DB_USER`, `DB_PASS` og `DB_PORT` brukes av Nuxt-applikasjonen for å koble til databasen. Standardverdiene fungerer direkte mot Docker Compose-konfigurasjonen.
 
-Den medfølgende init-scriptet oppretter nødvendige tabeller, visninger og prosedyrer som applikasjonen forventer (bl.a. `validUsers`, `user_teams`, `user_roles`, `projectModel`, `DuplicateProject` m.m.) og fyller dem med et minimum av testdata. Etter oppstart kan du logge inn med administratorbrukeren `admin` / `admin` (rolle-ID `1`) eller standardbrukeren `user` / `user` (rolle-ID `3`).
+Den medfølgende init-scriptet oppretter nødvendige tabeller, visninger og prosedyrer som applikasjonen forventer (bl.a. `validUsers`, `user_teams`, `user_roles`, `projectModel`, `DuplicateProject` m.m.) og fyller dem med et minimum av testdata. Etter oppstart finnes tre forhåndsopprettede brukere:
+
+| Rolle-ID | Brukernavn    | Passord        | Beskrivelse                |
+|----------|---------------|----------------|----------------------------|
+| 1        | `user`        | *(ikke nødvendig)* | Vanlig bruker uten passord |
+| 2        | `admin`       | `admin`        | Administrator               |
+| 3        | `superadmin`  | `superadmin`   | Superadministrator          |
+
+Vanlige brukere identifiseres kun med brukernavn, mens administrator og superadministrator må oppgi passord ved innlogging.
 
 
 
