@@ -15,6 +15,8 @@ services:
       DB_PASS: ${DB_PASS:-GatesUser!Pass123}
       DB_NAME: ${DB_NAME:-gates}
       DB_PORT: ${DB_PORT:-1433}
+      NUXT_TOKEN_SECRET: ${NUXT_TOKEN_SECRET:-gates-dev-secret}
+      NUXT_TOKEN_EXPIRATION: ${NUXT_TOKEN_EXPIRATION:-12h}
     volumes:
       - .:/app
       - /app/node_modules
