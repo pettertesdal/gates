@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    command: npm run dev -- --host 0.0.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      DB_SERVER: db
+      DB_USER: ${DB_USER:-gates_user}
+      DB_PASS: ${DB_PASS:-GatesUser!Pass123}
+      DB_NAME: ${DB_NAME:-gates}
+      DB_PORT: ${DB_PORT:-1433}
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+
+  db:
+    build:
+      context: ./docker/sqlserver
+    image: gates-sqlserver:local
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+      SA_PASSWORD: ${SA_PASSWORD:-YourStrong!Passw0rd}
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sqlcmd -S localhost -U sa -P $$SA_PASSWORD -C -Q \"SELECT 1\" || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD:-YourStrong!Passw0rd}
+    volumes:
+      - ./docker/sqlserver/init.sql:/init.sql:ro
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "sqlcmd -S db -U sa -P \"$SA_PASSWORD\" -C -d master -i /init.sql",
+      ]
+    restart: "no"
+
+volumes:
+  mssql-data:
