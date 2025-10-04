@@ -7,18 +7,35 @@ Når de korrekte avhengigheter er innstallert kjøres applikasjonen ved kommando
 
 # Docker-basert utviklingsmiljø
 
-Prosjektet kan nå kjøres lokalt med Docker og Docker Compose. Dette starter både applikasjonen og en SQL Server-instans med en ferdig konfigurert database. Compose bygger en lokal SQL Server-avbildning som inkluderer `sqlcmd`, siden det ikke lenger leveres i den offisielle `mcr.microsoft.com/mssql/server:2022-latest`-avbildningen.
+Prosjektet kan nå kjøres lokalt med Docker og Docker Compose. Dette starter både applikasjonen og en SQL Server-instans med en ferdig konfigurert database. Compose tilbyr to profiler slik at du kan velge mellom et lokalt "demo"-oppsett (bygger containerne fra kildekoden din) og et "prod"-oppsett som trekker ferdigbygde avbildninger fra GitHub Container Registry (GHCR).
 
 1. Kopier `.env.example` til `.env` og juster eventuelle variabler ved behov.
-2. Start miljøet med:
+2. Kjør én av profilene:
 
-   ```bash
-   docker compose up --build
-   ```
+   - Lokal demo med live-reload og lokalt bygde bilder:
 
-   Tjenesten er tilgjengelig på [http://localhost:3000](http://localhost:3000) når byggingen er ferdig.
+     ```bash
+     docker compose --profile demo up --build
+     ```
 
-Compose-oppsettet oppretter databasen `gates` med brukeren `gates_user`. Miljøvariablene `DB_SERVER`, `DB_NAME`, `DB_USER`, `DB_PASS` og `DB_PORT` brukes av Nuxt-applikasjonen for å koble til databasen. Standardverdiene fungerer direkte mot Docker Compose-konfigurasjonen.
+   - Produksjonslignende kjøring med bilder fra GHCR (krever at `APP_IMAGE` og `SQL_IMAGE` er satt i `.env`):
+
+     ```bash
+     docker compose --profile prod up -d
+     ```
+
+   Begge variantene eksponerer applikasjonen på [http://localhost:3000](http://localhost:3000).
+
+Compose-oppsettet oppretter databasen `gates` med brukeren `gates_user`. Miljøvariablene `DB_SERVER`, `DB_NAME`, `DB_USER`, `DB_PASS` og `DB_PORT` brukes av Nuxt-applikasjonen for å koble til databasen. Profilene setter automatisk riktig `DB_SERVER`-verdi (hhv. `db-demo` og `db-prod`).
+
+For `prod`-profilen må du angi hvilke containere som skal hentes fra GHCR:
+
+```env
+APP_IMAGE=ghcr.io/<eier>/gates-app:latest
+SQL_IMAGE=ghcr.io/<eier>/gates-sqlserver:latest
+```
+
+Disse variablene kan også peke til andre tagger (for eksempel commit-hashene workflowen publiserer).
 
 For innlogging og sesjonshåndtering brukes JSON Web Tokens. Sett `NUXT_TOKEN_SECRET` til en valgfri streng for å signere tokenene og `NUXT_TOKEN_EXPIRATION` til ønsket gyldighetstid (for eksempel `12h`). Docker Compose-konfigurasjonen fyller inn sikre standardverdier dersom variablene ikke er definert.
 
@@ -38,7 +55,7 @@ Repositoryet inneholder en GitHub Actions-workflow (`.github/workflows/deploy.ym
 
 1. Logger inn mot GitHub Container Registry (GHCR) med `GITHUB_TOKEN`.
 2. Bygger produksjonsvarianten av applikasjonsavbildningen (`ghcr.io/<eier>/gates-app`) og SQL Server-avbildningen (`ghcr.io/<eier>/gates-sqlserver`), tagget med både `latest` og commit-SHA.
-3. Utfører en SSH-deploy til en VPS dersom hemmelighetene `VPS_HOST`, `VPS_USER` og `SSH_PRIVATE_KEY` er konfigurert. På serveren forventes et oppsett i `~/docker/gates` som kan oppdateres med `docker compose pull` og `docker compose up -d`.
+3. Utfører en SSH-deploy til en VPS dersom hemmelighetene `VPS_HOST`, `VPS_USER` og `SSH_PRIVATE_KEY` er konfigurert. På serveren forventes et oppsett i `~/docker/gates` som kan oppdateres med `docker compose --profile prod pull` og `docker compose --profile prod up -d`.
 
 ### Nødvendige hemmeligheter
 

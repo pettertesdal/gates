@@ -1,7 +1,27 @@
 version: "3.9"
 
+x-app-env: &app-env
+  DB_USER: ${DB_USER:-gates_user}
+  DB_PASS: ${DB_PASS:-GatesUser!Pass123}
+  DB_NAME: ${DB_NAME:-gates}
+  DB_PORT: ${DB_PORT:-1433}
+  NUXT_TOKEN_SECRET: ${NUXT_TOKEN_SECRET:-gates-dev-secret}
+  NUXT_TOKEN_EXPIRATION: ${NUXT_TOKEN_EXPIRATION:-12h}
+
+x-db-healthcheck: &db-healthcheck
+  test:
+    [
+      "CMD-SHELL",
+      "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $$SA_PASSWORD -C -Q \"SELECT 1\" || exit 1",
+    ]
+  interval: 10s
+  timeout: 5s
+  retries: 10
+  start_period: 30s
+
 services:
-  app:
+  app-demo:
+    profiles: ["demo"]
     build:
       context: .
       target: dev
@@ -9,24 +29,35 @@ services:
     ports:
       - "3000:3000"
     environment:
+      <<: *app-env
       NODE_ENV: development
-      DB_SERVER: db
-      DB_USER: ${DB_USER:-gates_user}
-      DB_PASS: ${DB_PASS:-GatesUser!Pass123}
-      DB_NAME: ${DB_NAME:-gates}
-      DB_PORT: ${DB_PORT:-1433}
-      NUXT_TOKEN_SECRET: ${NUXT_TOKEN_SECRET:-gates-dev-secret}
-      NUXT_TOKEN_EXPIRATION: ${NUXT_TOKEN_EXPIRATION:-12h}
+      DB_SERVER: db-demo
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
-      db:
+      db-demo:
         condition: service_healthy
-      db-init:
+      db-init-demo:
         condition: service_completed_successfully
 
-  db:
+  app-prod:
+    profiles: ["prod"]
+    image: ${APP_IMAGE?Set APP_IMAGE to the GHCR tag for the app image}
+    ports:
+      - "3000:3000"
+    environment:
+      <<: *app-env
+      NODE_ENV: production
+      DB_SERVER: db-prod
+    depends_on:
+      db-prod:
+        condition: service_healthy
+      db-init-prod:
+        condition: service_completed_successfully
+
+  db-demo:
+    profiles: ["demo"]
     build:
       context: ./docker/sqlserver
     image: gates-sqlserver:local
@@ -37,22 +68,27 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - mssql-data:/var/opt/mssql
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "sqlcmd -S localhost -U sa -P $$SA_PASSWORD -C -Q \"SELECT 1\" || exit 1",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+      - mssql-data-demo:/var/opt/mssql
+    healthcheck: *db-healthcheck
 
-  db-init:
+  db-prod:
+    profiles: ["prod"]
+    image: ${SQL_IMAGE?Set SQL_IMAGE to the GHCR tag for the SQL Server image}
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+      SA_PASSWORD: ${SA_PASSWORD:-YourStrong!Passw0rd}
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data-prod:/var/opt/mssql
+    healthcheck: *db-healthcheck
+
+  db-init-demo:
+    profiles: ["demo"]
     image: mcr.microsoft.com/mssql-tools
     depends_on:
-      db:
+      db-demo:
         condition: service_healthy
     environment:
       SA_PASSWORD: ${SA_PASSWORD:-YourStrong!Passw0rd}
@@ -62,9 +98,28 @@ services:
       [
         "/bin/bash",
         "-c",
-        "/opt/mssql-tools/bin/sqlcmd -S db -U sa -P \"$SA_PASSWORD\" -C -d master -i /init.sql",
+        "/opt/mssql-tools/bin/sqlcmd -S db-demo -U sa -P \"$SA_PASSWORD\" -C -d master -i /init.sql",
+      ]
+    restart: "no"
+
+  db-init-prod:
+    profiles: ["prod"]
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      db-prod:
+        condition: service_healthy
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD:-YourStrong!Passw0rd}
+    volumes:
+      - ./docker/sqlserver/init.sql:/init.sql:ro
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "/opt/mssql-tools/bin/sqlcmd -S db-prod -U sa -P \"$SA_PASSWORD\" -C -d master -i /init.sql",
       ]
     restart: "no"
 
 volumes:
-  mssql-data:
+  mssql-data-demo:
+  mssql-data-prod:
