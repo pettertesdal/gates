@@ -76,6 +76,7 @@ Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introdu
 ## Setup
 
 Make sure to install the dependencies:
+% test comment
 
 ```bash
 # Dette er vårt prosjekt i forbindelse med faget DAT191 og den tilhørende bacheloroppgave. Ved sensur anbefales det at vercel (se link i systemdokumentasjonen) tas i bruk for å benytte seg av den tilhørende databasen gruppen har brukt underveis i utviklingen, men om dette ikke skulle være gjennomførbart kan gruppen kontaktes for å få tak i dens .env variabler. 
