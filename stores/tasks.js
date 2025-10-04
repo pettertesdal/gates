@@ -315,23 +315,46 @@ export const useTasksStore = defineStore('tasks', () => {
                 method: 'GET'
             });
 
-            const taskArray = response.map(task => ({
-                ID: task.ID.toString(),
-                prosjektID: task.prosjektID,
-                gateID: task.gateID,
-                step: task.step,
-                title: task.title,
-                responsiblePerson: task.responsiblePerson,
-                onTime: task.onTime,
-                progress: task.progress,
-                duration: task.duration,
-                comment: task.comment,
-                completeDate: task.completeDate,
-                updateUser: task.updateUser
-            }));
+            if (!Array.isArray(response)) {
+                console.error('Error fetching tasks: Expected an array response but received', response);
+                setTasks([]);
+                return;
+            }
+
+            const taskArray = response.flatMap((task) => {
+                const rawId = task?.ID ?? task?.id;
+                const rawProjectId = task?.prosjektID ?? task?.prosjektId ?? task?.projectID ?? task?.projectId;
+                const rawGateId = task?.gateID ?? task?.gateId;
+
+                if (rawId === undefined || rawId === null || rawProjectId === undefined || rawProjectId === null || rawGateId === undefined || rawGateId === null) {
+                    console.warn('Skipping task without required identifiers', task);
+                    return [];
+                }
+
+                const step = Number.isFinite(Number(task?.step)) ? Number(task.step) : 0;
+                const progress = Number.isFinite(Number(task?.progress)) ? Number(task.progress) : 0;
+                const duration = Number.isFinite(Number(task?.duration)) ? Number(task.duration) : 0;
+
+                return [{
+                    ID: rawId.toString(),
+                    prosjektID: rawProjectId.toString(),
+                    gateID: rawGateId.toString(),
+                    step,
+                    title: task?.title ?? '',
+                    responsiblePerson: task?.responsiblePerson ?? '',
+                    onTime: task?.onTime ?? 0,
+                    progress,
+                    duration,
+                    comment: task?.comment ?? '',
+                    completeDate: task?.completeDate ?? null,
+                    updateUser: task?.updateUser ?? null
+                }];
+            });
+
             setTasks(taskArray);
         } catch (error) {
             console.error('Error fetching tasks:', error);
+            setTasks([]);
         }
     }
 
