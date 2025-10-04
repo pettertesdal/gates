@@ -57,21 +57,45 @@ export const useGatesStore = defineStore('gates', () => {
                 method: 'GET'
             });
 
-            const gateArray = response.map(gate => ({
-                ID: gate.ID.toString(),
-                projectID: gate.prosjektID.toString(),
-                gateNR: gate.gateNR,
-                title: gate.gateTitle,
-                plannedDate: "1000-07-07",
-                completionDate: "1000-07-07",
-                daysToEnd: 0,
-                progress: gate.progress,
-                stage: gate.stage
-            }));
+            if (!Array.isArray(response)) {
+                console.error('Error fetching gates: Expected an array response but received', response);
+                setGates([]);
+                return;
+            }
+
+            const gateArray = response
+                .map((gate) => {
+                    const rawProjectID = gate?.prosjektID ?? gate?.prosjektId ?? gate?.projectID ?? gate?.projectId;
+                    const rawGateNumber = gate?.gateNR ?? gate?.gateNr ?? gate?.gateID ?? gate?.gateId ?? gate?.stage;
+
+                    if (rawProjectID === undefined || rawProjectID === null) {
+                        console.warn('Skipping gate without a project identifier', gate);
+                        return null;
+                    }
+
+                    if (gate?.ID === undefined || gate?.ID === null) {
+                        console.warn('Skipping gate without an ID', gate);
+                        return null;
+                    }
+
+                    return {
+                        ID: gate.ID.toString(),
+                        projectID: rawProjectID.toString(),
+                        gateNR: rawGateNumber ?? 0,
+                        title: gate?.gateTitle ?? '',
+                        plannedDate: gate?.plannedDate ?? '1000-07-07',
+                        completionDate: gate?.completionDate ?? '1000-07-07',
+                        daysToEnd: 0,
+                        progress: gate?.progress ?? 0,
+                        stage: gate?.stage ?? (typeof rawGateNumber === 'number' ? rawGateNumber : 0)
+                    };
+                })
+                .filter((gate) => gate !== null);
 
             setGates(gateArray);
         } catch (error) {
             console.error('Error fetching gates:', error);
+            setGates([]);
         }
     }
 

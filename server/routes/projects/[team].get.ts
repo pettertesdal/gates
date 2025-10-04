@@ -20,9 +20,9 @@ export default defineEventHandler(async (event) => {
 
   try {
     progressList = await connectAndQuery(`
-      SELECT p.ID, p.team, g.stage, AVG(t.progress) AS AverageProgress 
-      FROM [db_owner].[projectModel] p 
-      JOIN [db_owner].[gateModel] g ON p.ID = g.prosjektId 
+      SELECT p.ID, p.team, g.stage, AVG(t.progress) AS AverageProgress
+      FROM [db_owner].[projectModel] p
+      JOIN [db_owner].[gateModel] g ON p.ID = g.prosjektID
       JOIN [db_owner].[taskModel] t ON p.ID = t.prosjektID AND g.ID = t.gateID
       WHERE (p.team = ${team}) OR (p.template ='true')
       GROUP BY p.ID, p.team, g.stage

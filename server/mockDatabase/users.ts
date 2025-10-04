@@ -1,7 +1,7 @@
 export const mockValidUsers = [
-  { username: 'john_doe', role: 'admin', team: 'engineering' },
-  { username: 'Petter Tesdal', role: 'user', team: 'marketing' },
-  { username: 'alice_jones', role: 'moderator', team: 'support' },
+  { username: 'user', role: 1, team: 1 },
+  { username: 'admin', role: 2, team: 1 },
+  { username: 'superadmin', role: 3, team: 1 },
 ];
 
 
