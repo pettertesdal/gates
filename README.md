@@ -1,149 +1,101 @@
-# Introduksjon
-Dette er vårt prosjekt i forbindelse med faget DAT191 og den tilhørende bacheloroppgave. Ved sensur anbefales det at vercel (se link i systemdokumentasjonen) tas i bruk for å benytte seg av den tilhørende databasen gruppen har brukt underveis i utviklingen, men om dette ikke skulle være gjennomførbart kan gruppen kontaktes for å få tak i dens .env variabler. 
+# Gates
 
-Når de korrekte avhengigheter er innstallert kjøres applikasjonen ved kommando npm run dev.
+Gates is a Nuxt 3 application backed by a Microsoft SQL Server database.  The repository contains everything you need to run the
+application locally with Docker, build production images, and deploy them to a remote server.
 
+## Prerequisites
 
+* Node.js 20.x (only required for running outside Docker)
+* npm 9+
+* Docker and Docker Compose v2
 
-# Docker-basert utviklingsmiljø
+## 1. Configure environment variables
 
-Prosjektet kan nå kjøres lokalt med Docker og Docker Compose. Dette starter både applikasjonen og en SQL Server-instans med en ferdig konfigurert database. Compose tilbyr to profiler slik at du kan velge mellom et lokalt "demo"-oppsett (bygger containerne fra kildekoden din) og et "prod"-oppsett som trekker ferdigbygde avbildninger fra GitHub Container Registry (GHCR).
-
-1. Kopier `.env.example` til `.env` og juster eventuelle variabler ved behov.
-2. Kjør én av profilene:
-
-   - Lokal demo med live-reload og lokalt bygde bilder:
-
-     ```bash
-     docker compose --profile demo up --build
-     ```
-
-   - Produksjonslignende kjøring med bilder fra GHCR (krever at `APP_IMAGE` og `SQL_IMAGE` er satt i `.env`):
-
-     ```bash
-     docker compose --profile prod up -d
-     ```
-
-   Begge variantene eksponerer applikasjonen på [http://localhost:3000](http://localhost:3000).
-
-Compose-oppsettet oppretter databasen `gates` med brukeren `gates_user`. Miljøvariablene `DB_SERVER`, `DB_NAME`, `DB_USER`, `DB_PASS` og `DB_PORT` brukes av Nuxt-applikasjonen for å koble til databasen. Profilene setter automatisk riktig `DB_SERVER`-verdi (hhv. `db-demo` og `db-prod`).
-
-For `prod`-profilen må du angi hvilke containere som skal hentes fra GHCR:
-
-```env
-APP_IMAGE=ghcr.io/<eier>/gates-app:latest
-SQL_IMAGE=ghcr.io/<eier>/gates-sqlserver:latest
-```
-
-Disse variablene kan også peke til andre tagger (for eksempel commit-hashene workflowen publiserer).
-
-For innlogging og sesjonshåndtering brukes JSON Web Tokens. Sett `NUXT_TOKEN_SECRET` til en valgfri streng for å signere tokenene og `NUXT_TOKEN_EXPIRATION` til ønsket gyldighetstid (for eksempel `12h`). Docker Compose-konfigurasjonen fyller inn sikre standardverdier dersom variablene ikke er definert.
-
-Den medfølgende init-scriptet oppretter nødvendige tabeller, visninger og prosedyrer som applikasjonen forventer (bl.a. `validUsers`, `user_teams`, `user_roles`, `projectModel`, `DuplicateProject` m.m.) og fyller dem med et minimum av testdata. Etter oppstart finnes tre forhåndsopprettede brukere:
-
-| Rolle-ID | Brukernavn    | Passord        | Beskrivelse                |
-|----------|---------------|----------------|----------------------------|
-| 1        | `user`        | *(ikke nødvendig)* | Vanlig bruker uten passord |
-| 2        | `admin`       | `admin`        | Administrator               |
-| 3        | `superadmin`  | `superadmin`   | Superadministrator          |
-
-Vanlige brukere identifiseres kun med brukernavn, mens administrator og superadministrator må oppgi passord ved innlogging.
-
-## CI/CD og utrulling til VPS
-
-Repositoryet inneholder en GitHub Actions-workflow (`.github/workflows/deploy.yml`) som bygger og publiserer Docker-avbildninger hver gang `main`-grenen oppdateres. Workflowen:
-
-1. Logger inn mot GitHub Container Registry (GHCR) med `GITHUB_TOKEN`.
-2. Bygger produksjonsvarianten av applikasjonsavbildningen (`ghcr.io/<eier>/gates-app`) og SQL Server-avbildningen (`ghcr.io/<eier>/gates-sqlserver`), tagget med både `latest` og commit-SHA.
-3. Utfører en SSH-deploy til en VPS dersom hemmelighetene `VPS_HOST`, `VPS_USER` og `SSH_PRIVATE_KEY` er konfigurert. På serveren forventes et oppsett i `~/docker/gates` som kan oppdateres med `docker compose --profile prod pull` og `docker compose --profile prod up -d`.
-
-### Nødvendige hemmeligheter
-
-- `VPS_HOST`: IP eller hostname til serveren som skal oppdateres.
-- `VPS_USER`: Brukeren workflowen skal logge inn som.
-- `SSH_PRIVATE_KEY`: Privatnøkkel (typisk i PEM-format) for innlogging på serveren.
-
-Dersom en eller flere av disse hemmelighetene ikke er satt, hoppes deploy-trinnet over, men containerne pushes fortsatt til GHCR slik at de kan hentes manuelt.
-
-
-
-# Nuxt 3 Minimal Starter
-
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
-
-## Setup
-
-Make sure to install the dependencies:
-% test comment
+Copy the example file and adjust it to your needs:
 
 ```bash
-# Dette er vårt prosjekt i forbindelse med faget DAT191 og den tilhørende bacheloroppgave. Ved sensur anbefales det at vercel (se link i systemdokumentasjonen) tas i bruk for å benytte seg av den tilhørende databasen gruppen har brukt underveis i utviklingen, men om dette ikke skulle være gjennomførbart kan gruppen kontaktes for å få tak i dens .env variabler. 
-# Når de korrekte avhengigheter er innstallert kjøres applikasjonen ved kommando npm run dev.
+cp .env.example .env
+```
 
-# npm
+Key variables:
+
+| Variable | Description |
+| --- | --- |
+| `DB_SERVER`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` | Connection settings used by the Nuxt server to talk to SQL Server. |
+| `SA_PASSWORD` | Strong password for the `sa` administrator account used when provisioning SQL Server via Docker Compose. |
+| `NUXT_TOKEN_SECRET`, `NUXT_TOKEN_EXPIRATION` | Secrets for signing and expiring JSON Web Tokens. |
+| `APP_IMAGE`, `SQL_IMAGE` | Optional. Overrides that point to pre-built container images when using the `prod` compose profile. |
+
+## 2. Run the stack with Docker Compose
+
+The quickest way to get a fully working environment is to use Docker Compose.  The stack includes:
+
+* `app-demo`: Nuxt development server with hot reload.
+* `db-demo`: SQL Server Express instance built from `docker/sqlserver/Dockerfile` and seeded with schema and sample data from
+  `docker/sqlserver/init.sql`.
+* `db-init-demo`: One-shot container that applies the SQL script once the database is reachable.
+
+Start everything:
+
+```bash
+docker compose --profile demo up --build
+```
+
+The Nuxt application becomes available at [http://localhost:3000](http://localhost:3000).  Database data files are stored in the
+`mssql-data-demo` named volume so that restarts keep your data.
+
+### Production-like profile
+
+When you have published container images (see the deployment workflow below), you can run the same stack with the `prod` profile:
+
+```bash
+docker compose --profile prod up -d
+```
+
+For this to work you must define `APP_IMAGE` and `SQL_IMAGE` (for example in `.env`) so Compose knows which images to pull.
+
+Both profiles expose the same environment variables to the Nuxt server, so the application connects to the correct SQL Server
+instance without any code changes.
+
+## 3. Developing without Docker
+
+If you prefer running everything locally, make sure SQL Server is available and that the credentials in your `.env` file point to
+it.  Then install dependencies and start the Nuxt dev server:
+
+```bash
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+## 4. Database layout and seed data
 
-Build the application for production:
+`docker/sqlserver/init.sql` provisions the `gates` database, schemas, stored procedures, and seed data expected by the
+application.  It creates the `gates_user` login, assigns it to the `db_owner` schema, and populates tables such as `validUsers`,
+`user_roles`, `user_teams`, and `admin_pass`.  Three default users are available after bootstrapping:
 
-```bash
-# npm
-npm run build
+| Username | Role | Notes |
+| --- | --- | --- |
+| `user` | Standard user | Password not required. |
+| `admin` | Administrator | Password `admin`. |
+| `superadmin` | Super administrator | Password `superadmin`. |
 
-# pnpm
-pnpm run build
+Feel free to change these credentials in the SQL script if you need other defaults.
 
-# yarn
-yarn build
+## 5. CI/CD with GitHub Actions
 
-# bun
-bun run build
-```
+`.github/workflows/deploy.yml` builds and publishes two images whenever `main` is updated:
 
-Locally preview production build:
+1. `ghcr.io/<owner>/gates-app` – the production Nuxt image built from the multi-stage `Dockerfile`.
+2. `ghcr.io/<owner>/gates-sqlserver` – the SQL Server image including the command-line tools required by the init container.
 
-```bash
-# npm
-npm run preview
+If the repository secrets `VPS_HOST`, `VPS_USER`, and `SSH_PRIVATE_KEY` are configured, the workflow also SSHes into your server,
+changes to `~/docker/gates`, pulls the freshly built images, and restarts the stack with `docker compose --profile prod up -d
+--remove-orphans`.
 
-# pnpm
-pnpm run preview
+## 6. Deploying manually on a server
 
-# yarn
-yarn preview
+1. Copy the repository (or at least `docker-compose.yml` and the `docker/` directory) to the server, e.g. to `~/docker/gates`.
+2. Provide a `.env` file with the production values for secrets and database credentials.
+3. Run `docker compose --profile prod pull` followed by `docker compose --profile prod up -d`.
 
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
-# XT-Gates
+The same compose file used locally works in production, ensuring parity between environments.

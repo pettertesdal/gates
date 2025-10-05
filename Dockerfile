@@ -1,4 +1,4 @@
-# Use a multi-stage build to support both development and production workflows
+# Multi-stage build supporting development and production workflows
 FROM node:20-alpine AS base
 
 WORKDIR /app
@@ -24,9 +24,8 @@ FROM node:20-alpine AS production
 ENV NODE_ENV=production
 WORKDIR /app
 
-# Copy only what we need for production runtime
-COPY --from=base /app/package*.json ./
-COPY --from=base /app/node_modules ./node_modules
+COPY package*.json ./
+RUN npm ci --omit=dev
 COPY --from=build /app/.output ./.output
 
 EXPOSE 3000

@@ -51,17 +51,14 @@ jobs:
 
       # --- Deploy to VPS over SSH ---
       - name: SSH into VPS and deploy
-        if: ${{ env.VPS_HOST && env.VPS_USER && env.SSH_PRIVATE_KEY }}
+        if: ${{ secrets.VPS_HOST && secrets.VPS_USER && secrets.SSH_PRIVATE_KEY }}
         uses: appleboy/ssh-action@v0.1.10
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         with:
-          host: ${{ env.VPS_HOST }}
-          username: ${{ env.VPS_USER }}
-          key: ${{ env.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/docker/gates-app
+            set -euo pipefail
+            cd ~/docker/gates
             docker compose --profile prod pull
-            docker compose --profile prod up -d
+            docker compose --profile prod up -d --remove-orphans
